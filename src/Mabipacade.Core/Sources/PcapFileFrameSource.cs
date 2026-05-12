@@ -37,8 +37,16 @@ public sealed class PcapFileFrameSource : IFrameSource
 
     private void OnCaptureStopped(object? sender, CaptureStoppedEventStatus status)
     {
-        EndOfStream?.Invoke(this, EventArgs.Empty);
-        _completion?.TrySetResult();
+        if (status == CaptureStoppedEventStatus.ErrorWhileCapturing)
+        {
+            _completion?.TrySetException(
+                new InvalidOperationException("Pcap capture failed: " + status));
+        }
+        else
+        {
+            EndOfStream?.Invoke(this, EventArgs.Empty);
+            _completion?.TrySetResult();
+        }
     }
 
     private void OnPacket(object? sender, PacketCapture e)
@@ -53,8 +61,11 @@ public sealed class PcapFileFrameSource : IFrameSource
     public void Dispose()
     {
         _cts?.Cancel();
+        try { _captureTask?.Wait(TimeSpan.FromSeconds(5)); } catch { }
         _reader?.Close();
         _reader?.Dispose();
+        _reader = null;
+        _captureTask = null;
         _cts?.Dispose();
     }
 }
