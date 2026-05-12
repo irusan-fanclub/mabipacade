@@ -35,3 +35,7 @@ Thumbs.db
 # DebugUi portable settings（per-machine、不入庫）
 src/Mabipacade.DebugUi/bin/**/settings.json
 src/Mabipacade.DebugUi/bin/**/filters.json
+
+# Test fixture pcaps (large binary, not committed)
+tests/Mabipacade.Core.Tests/fixtures/*.pcap
+!tests/Mabipacade.Core.Tests/fixtures/README.md
