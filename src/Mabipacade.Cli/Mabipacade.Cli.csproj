@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AssemblyName>mabipacade</AssemblyName>
+    <RootNamespace>Mabipacade.Cli</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta5.25306.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mabipacade.Core\Mabipacade.Core.csproj" />
+    <ProjectReference Include="..\Mabipacade.Decoders\Mabipacade.Decoders.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mabipacade.Cli.Tests" />
+  </ItemGroup>
+</Project>
