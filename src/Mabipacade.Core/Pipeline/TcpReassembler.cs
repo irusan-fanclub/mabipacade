@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Mabipacade.Core.Model;
 
 namespace Mabipacade.Core.Pipeline;
@@ -9,7 +10,7 @@ internal sealed class TcpReassembler
     private uint? _bufferStartSeq;
     private readonly List<TcpFrame> _pending = new();
 
-    public ReadOnlySpan<byte> GetBuffer() => _buffer.ToArray();
+    public ReadOnlySpan<byte> GetBuffer() => CollectionsMarshal.AsSpan(_buffer);
 
     public void Feed(TcpFrame frame)
     {

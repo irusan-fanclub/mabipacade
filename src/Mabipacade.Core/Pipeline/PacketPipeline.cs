@@ -110,5 +110,6 @@ public sealed class PacketPipeline : IDisposable
     {
         _source.FrameReceived -= OnFrame;
         _source.EndOfStream -= OnEos;
+        _source.Dispose();
     }
 }
