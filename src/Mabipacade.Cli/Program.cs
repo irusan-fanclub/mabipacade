@@ -9,7 +9,8 @@ public static class Program
     {
         var root = new RootCommand("Mabipacade CLI — Mabinogi packet sidecar")
         {
-            ReplayCommand.Build()
+            ReplayCommand.Build(),
+            CaptureCommand.Build()
         };
         return root.Parse(args).InvokeAsync();
     }
