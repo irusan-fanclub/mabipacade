@@ -1,0 +1,37 @@
+# .NET build output
+bin/
+obj/
+out/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+*.userprefs
+
+# Test results
+TestResults/
+[Cc]overage*/
+*.coverage
+*.coveragexml
+
+# Publish
+publish/
+*.publishproj
+
+# NuGet
+*.nupkg
+.nuget/
+
+# Logs / local dumps
+*.log
+sessions/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# DebugUi portable settings（per-machine、不入庫）
+src/Mabipacade.DebugUi/bin/**/settings.json
+src/Mabipacade.DebugUi/bin/**/filters.json
