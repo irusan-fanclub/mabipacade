@@ -88,4 +88,18 @@ public class MessageElemReaderTests
         Assert.Equal(ReadElemsResult.Ok, result);
         Assert.Empty(elems);
     }
+
+    [Fact]
+    public void Returns_BadBody_OnObsceneCount()
+    {
+        // Encode a uvarint > int.MaxValue (10-byte max uvarint for ulong.MaxValue)
+        // 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0x01 = ulong.MaxValue
+        var body = new byte[] { 0x00,                                    // outer reserved uvarint
+                                0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                0xFF, 0xFF, 0xFF, 0xFF, 0x01,            // count = ulong.MaxValue
+                                0x00 };                                  // reserved
+        var result = MessageElemReader.TryRead(body, out var elems);
+        Assert.Equal(ReadElemsResult.BadBody, result);
+        Assert.Empty(elems);
+    }
 }

@@ -24,6 +24,7 @@ public static class MessageElemReader
         if (offset >= body.Length) return ReadElemsResult.BadBody;
         offset += 1;
 
+        if (count > (ulong)Array.MaxLength) return ReadElemsResult.BadBody;
         var list = new List<MessageElem>((int)count);
         for (ulong i = 0; i < count; i++)
         {
