@@ -1,0 +1,12 @@
+using Mabipacade.Core.Plugins;
+
+namespace Mabipacade.Decoders.Skills;
+
+public sealed record PlayerSkillPostCastAck1(ushort SkillId);
+
+public sealed class PlayerSkillPostCastAck1Decoder : IPacketDecoder
+{
+    public ushort Op => 0x6988;
+    public object Decode(DecoderInput input) =>
+        new PlayerSkillPostCastAck1(input.Elems[0].AsUInt16());
+}
