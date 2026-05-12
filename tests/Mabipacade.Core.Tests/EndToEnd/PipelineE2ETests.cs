@@ -8,9 +8,10 @@ namespace Mabipacade.Core.Tests.EndToEnd;
 
 public class PipelineE2ETests
 {
-    private const string FixturePath = "fixtures/known_good.pcap";
+    private static readonly string FixturePath =
+        Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "fixtures", "known_good.pcap");
 
-    [Fact(Skip = "Requires local fixture")]
+    [Fact(Skip = "Requires local fixture — copy a pcap to tests/Mabipacade.Core.Tests/fixtures/known_good.pcap")]
     public async Task FullPipeline_ProducesPackets_FromRealPcap()
     {
         if (!File.Exists(FixturePath)) return;
@@ -26,7 +27,7 @@ public class PipelineE2ETests
         pipeline.SessionEventReceived += (_, e) => events.Add(e);
 
         await pipeline.StartAsync(CancellationToken.None);
-        await Task.Delay(1000);
+        await Task.Delay(2000);
         await pipeline.StopAsync();
 
         Assert.True(packets.Count > 0, "expected at least one decoded packet");

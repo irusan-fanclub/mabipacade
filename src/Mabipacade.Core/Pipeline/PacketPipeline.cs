@@ -10,7 +10,7 @@ public sealed class PacketPipeline : IDisposable
 {
     private readonly IFrameSource _source;
     private readonly DecoderRegistry _decoders;
-    private readonly TcpReassembler _reassembler = new();
+    private readonly Dictionary<FlowKey, TcpReassembler> _reassemblers = new();
     private readonly PipelineMetrics _metrics = new();
 
     public event EventHandler<MabiPacket>? PacketReceived;
@@ -28,6 +28,8 @@ public sealed class PacketPipeline : IDisposable
     public Task StartAsync(CancellationToken ct) => _source.StartAsync(ct);
     public Task StopAsync() => _source.StopAsync();
 
+    private readonly record struct FlowKey(System.Net.IPAddress SrcIp, ushort SrcPort, System.Net.IPAddress DstIp, ushort DstPort);
+
     private void OnFrame(object? sender, RawFrameEventArgs e)
     {
         _metrics.IncrementFrames();
@@ -36,31 +38,33 @@ public sealed class PacketPipeline : IDisposable
         if (tcp?.PayloadData is not { Length: > 0 } payload) return;
 
         var ip = tcp.ParentPacket as IPPacket;
-        var frame = new TcpFrame(
-            ip?.SourceAddress ?? System.Net.IPAddress.None,
-            tcp.SourcePort,
-            ip?.DestinationAddress ?? System.Net.IPAddress.None,
-            tcp.DestinationPort,
-            tcp.SequenceNumber,
-            payload,
-            e.TimestampUtc);
+        var srcIp = ip?.SourceAddress ?? System.Net.IPAddress.None;
+        var dstIp = ip?.DestinationAddress ?? System.Net.IPAddress.None;
+        var frame = new TcpFrame(srcIp, tcp.SourcePort, dstIp, tcp.DestinationPort,
+            tcp.SequenceNumber, payload, e.TimestampUtc);
 
-        _reassembler.Feed(frame);
-        DrainPackets(e.TimestampUtc);
+        var key = new FlowKey(srcIp, tcp.SourcePort, dstIp, tcp.DestinationPort);
+        if (!_reassemblers.TryGetValue(key, out var reassembler))
+        {
+            reassembler = new TcpReassembler();
+            _reassemblers[key] = reassembler;
+        }
+        reassembler.Feed(frame);
+        DrainPackets(reassembler, e.TimestampUtc);
     }
 
-    private void DrainPackets(DateTime timestampUtc)
+    private void DrainPackets(TcpReassembler reassembler, DateTime timestampUtc)
     {
         while (true)
         {
-            var buf = _reassembler.GetBuffer();
+            var buf = reassembler.GetBuffer();
             if (buf.Length == 0) return;
 
             var result = MabiPacketFramer.TryReadOne(buf, out var slice, out int consumed);
             switch (result)
             {
                 case FrameResult.Ok:
-                    _reassembler.Consume(consumed);
+                    reassembler.Consume(consumed);
                     if (slice is not null) EmitPacket(slice, timestampUtc);
                     break;
                 case FrameResult.NeedMore:
@@ -68,7 +72,7 @@ public sealed class PacketPipeline : IDisposable
                 case FrameResult.FramingError:
                     _metrics.IncrementResync();
                     SessionEventReceived?.Invoke(this, new SessionEvent.FrameResync(timestampUtc, 0, "framing error"));
-                    _reassembler.Reset();
+                    reassembler.Reset();
                     return;
             }
         }
