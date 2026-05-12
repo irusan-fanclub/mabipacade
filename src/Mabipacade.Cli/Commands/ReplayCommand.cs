@@ -15,7 +15,7 @@ internal static class ReplayCommand
         var input = new Option<FileInfo>("--in") { Description = "Pcap file to replay", Required = true };
         var filterOp = new Option<string?>("--filter-op") { Description = "Comma-separated hex op list, e.g. 0x6984,0x7926" };
         var decodedOnly = new Option<bool>("--decoded-only") { Description = "Skip packets without an L3 decoder" };
-        var diagnostics = new Option<string?>("--diagnostics") { Description = "off|on|summary (default off)" };
+        var diagnostics = new Option<string?>("--diagnostics") { Description = "off|on (default off)" };
 
         var cmd = new Command("replay", "Replay a pcap file and emit NDJSON to stdout")
         {

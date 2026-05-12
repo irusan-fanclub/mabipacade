@@ -6,7 +6,6 @@ internal sealed class DiagnosticsLevel
 {
     public static readonly DiagnosticsLevel Off = new("off", suppressDiagnostic: true);
     public static readonly DiagnosticsLevel On = new("on", suppressDiagnostic: false);
-    public static readonly DiagnosticsLevel Summary = new("summary", suppressDiagnostic: false);
 
     private readonly bool _suppressDiagnostic;
     public string Name { get; }
@@ -26,8 +25,8 @@ internal sealed class DiagnosticsLevel
     {
         null or "" or "off" => Off,
         "on" => On,
-        "summary" => Summary,
-        _ => throw new FormatException($"--diagnostics must be off|on|summary, got '{spec}'")
+        "summary" => throw new FormatException("--diagnostics summary is not yet implemented; use 'on' for now (deferred to M3)"),
+        _ => throw new FormatException($"--diagnostics must be off|on, got '{spec}'")
     };
 
     public override bool Equals(object? obj) => obj is DiagnosticsLevel d && d.Name == Name;

@@ -22,7 +22,7 @@ internal static class CaptureCommand
         var noStdout = new Option<bool>("--no-stdout") { Description = "Suppress stdout NDJSON (only record)" };
         var filterOp = new Option<string?>("--filter-op") { Description = "Comma-separated hex op list" };
         var decodedOnly = new Option<bool>("--decoded-only") { Description = "Skip packets without an L3 decoder" };
-        var diagnostics = new Option<string?>("--diagnostics") { Description = "off|on|summary (default off)" };
+        var diagnostics = new Option<string?>("--diagnostics") { Description = "off|on (default off)" };
 
         var cmd = new Command("capture", "Live-capture Mabinogi traffic and emit NDJSON to stdout")
         {

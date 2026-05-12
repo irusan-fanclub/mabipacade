@@ -26,6 +26,7 @@ internal sealed class NdjsonWriter
         {
             _out.Write(line);
             _out.Write('\n');
+            _out.Flush();
         }
     }
 }

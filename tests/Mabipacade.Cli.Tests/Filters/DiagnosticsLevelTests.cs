@@ -28,12 +28,18 @@ public class DiagnosticsLevelTests
     }
 
     [Fact]
-    public void Parse_OffOnSummary()
+    public void Parse_OffAndOn()
     {
         Assert.Equal(DiagnosticsLevel.Off, DiagnosticsLevel.Parse("off"));
         Assert.Equal(DiagnosticsLevel.On, DiagnosticsLevel.Parse("on"));
-        Assert.Equal(DiagnosticsLevel.Summary, DiagnosticsLevel.Parse("summary"));
         Assert.Equal(DiagnosticsLevel.Off, DiagnosticsLevel.Parse(null));
+    }
+
+    [Fact]
+    public void Parse_Summary_Throws_NotYetImplemented()
+    {
+        var ex = Assert.Throws<FormatException>(() => DiagnosticsLevel.Parse("summary"));
+        Assert.Contains("not yet implemented", ex.Message);
     }
 
     [Fact]
