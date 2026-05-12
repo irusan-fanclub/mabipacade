@@ -24,7 +24,7 @@ public sealed record RegionProfile(
     public bool Contains(IPAddress addr, ushort port)
     {
         if (KnownPorts.Count > 0 && !KnownPorts.Contains(port)) return false;
-        if (ServerRanges.Count == 0) return false;
+        if (ServerRanges.Count == 0) return true;
         foreach (var r in ServerRanges)
             if (r.Contains(addr)) return true;
         return false;

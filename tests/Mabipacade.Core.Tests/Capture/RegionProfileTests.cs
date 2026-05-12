@@ -23,4 +23,22 @@ public class RegionProfileTests
         Assert.NotNull(RegionProfiles.Taiwan);
         Assert.Equal("tw", RegionProfiles.Taiwan.Name);
     }
+
+    [Fact]
+    public void Contains_PortOnlyProfile_MatchesAnyIp_OnKnownPort()
+    {
+        var profile = new RegionProfile("port-only",
+            Array.Empty<IpRange>(),
+            new ushort[] { 11000 });
+        Assert.True(profile.Contains(IPAddress.Parse("1.2.3.4"), 11000));
+        Assert.True(profile.Contains(IPAddress.Parse("203.0.113.42"), 11000));
+        Assert.False(profile.Contains(IPAddress.Parse("1.2.3.4"), 22222));
+    }
+
+    [Fact]
+    public void Contains_Taiwan_MatchesPort11000_AnyIp()
+    {
+        Assert.True(RegionProfiles.Taiwan.Contains(IPAddress.Parse("61.218.1.2"), 11000));
+        Assert.False(RegionProfiles.Taiwan.Contains(IPAddress.Parse("61.218.1.2"), 22222));
+    }
 }
