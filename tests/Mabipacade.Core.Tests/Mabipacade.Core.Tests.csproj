@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Mabipacade.Core\Mabipacade.Core.csproj" />
+    <ProjectReference Include="..\..\src\Mabipacade.Decoders\Mabipacade.Decoders.csproj" />
   </ItemGroup>
 
 </Project>
