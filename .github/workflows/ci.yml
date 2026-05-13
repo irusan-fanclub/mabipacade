@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build (warnings as errors)
+        run: dotnet build --no-restore -p:TreatWarningsAsErrors=true
+
+      # Skip tests that load wpcap.dll (PcapWriter directly, SessionRecorder via
+      # PcapWriter). Npcap isn't installed on GitHub-hosted runners; local dev
+      # runs the full suite.
+      - name: Test
+        run: dotnet test --no-build --filter "FullyQualifiedName!~PcapWriter&FullyQualifiedName!~SessionRecorder"
