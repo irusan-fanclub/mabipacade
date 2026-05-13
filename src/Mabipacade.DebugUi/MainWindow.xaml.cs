@@ -24,6 +24,7 @@ public partial class MainWindow : Window
             _vm.Source.OpenPcapPath = path;
 
         DataContext = _vm;
+        _vm.LoadNamesFromSettings(saved);
 
         Closing += (_, _) =>
         {

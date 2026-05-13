@@ -6,6 +6,22 @@ namespace Mabipacade.DebugUi.Tests.ViewModels;
 public class PacketRowVmTests
 {
     [Fact]
+    public void SkillName_ResolvesFromNameResolver()
+    {
+        var resolver = new Mabipacade.DebugUi.Resolution.NameResolver(
+            new Dictionary<int, Mabipacade.DebugUi.Resolution.SkillNameEntry>
+            {
+                [59000] = new(59000, "Final Hit", "終結一擊"),
+            });
+        var packet = new MabiPacket(DateTime.UtcNow, Direction.Inbound, 0x6984, 0UL,
+            Array.Empty<MessageElem>(),
+            Decoded: new Mabipacade.Decoders.Skills.PlayerSkillPrepareStart(59000));
+        var row = new PacketRowVm(packet, resolver);
+        Assert.Equal("終結一擊", row.SkillName);
+    }
+
+
+    [Fact]
     public void Construct_FormatsDisplayFields()
     {
         var ts = new DateTime(2026, 5, 13, 8, 23, 11, 842, DateTimeKind.Utc);

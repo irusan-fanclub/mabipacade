@@ -82,7 +82,8 @@
                     <DataGridTextColumn Header="Dir"  Binding="{Binding Dir}"  Width="40"/>
                     <DataGridTextColumn Header="Op"   Binding="{Binding Op}"   Width="70"/>
                     <DataGridTextColumn Header="EntityId" Binding="{Binding EntityId}" Width="140"/>
-                    <DataGridTextColumn Header="Type" Binding="{Binding TypeLabel}" Width="*"/>
+                    <DataGridTextColumn Header="Type" Binding="{Binding TypeLabel}" Width="180"/>
+                    <DataGridTextColumn Header="SkillName" Binding="{Binding SkillName}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -111,6 +112,15 @@
                             <DataGridTextColumn Header="Offset" Binding="{Binding Offset, StringFormat=X4}" Width="60"/>
                             <DataGridTextColumn Header="Bytes"  Binding="{Binding HexBytes}" Width="*"/>
                             <DataGridTextColumn Header="ASCII"  Binding="{Binding Ascii}"    Width="160"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="Names">
+                    <DataGrid ItemsSource="{Binding Detail.NameLookups}" AutoGenerateColumns="False" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="SkillId" Binding="{Binding SkillId}" Width="70"/>
+                            <DataGridTextColumn Header="English" Binding="{Binding EnglishName}" Width="*"/>
+                            <DataGridTextColumn Header="Local"   Binding="{Binding LocalName}"   Width="*"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>

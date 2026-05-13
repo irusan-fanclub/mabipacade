@@ -12,6 +12,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private ReplaySession? _replaySession;
     private LiveSession? _liveSession;
 
+    private readonly Services.NameResolverService _nameResolver = new();
     private bool _isRunning;
     private string _activityState = "○ Stopped";
 
@@ -40,6 +41,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public StatusViewModel Status { get; } = new();
     public ReplayTransportViewModel? ReplayTransport { get; private set; }
 
+    public Services.NameResolverService NameResolverService => _nameResolver;
+
     public ICommand OpenReplayCommand { get; }
     public ICommand StartLiveCommand { get; }
     public ICommand StopCommand { get; }
@@ -49,6 +52,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         _dispatcher = dispatcher;
         PacketList = new PacketListViewModel(Filter);
+        _nameResolver.Changed += (_, _) =>
+        {
+            PacketList.SetNameResolver(_nameResolver.Current);
+            Detail.SetNameResolver(_nameResolver.Current);
+        };
 
         OpenReplayCommand = new RelayCommand(p => OpenReplay(p as string ?? Source.OpenPcapPath ?? ""), _ => !_isRunning);
         StartLiveCommand = new RelayCommand(_ => StartLive(), _ => !_isRunning);
@@ -119,6 +127,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         host.PacketReceived += (_, p) => PacketList.AddPacket(p);
         host.SessionEventReceived += (_, e) => Status.HandleEvent(e);
+    }
+
+    public void LoadNamesFromSettings(Models.DebugUiSettings settings)
+    {
+        _nameResolver.Reload(settings);
     }
 
     public void Dispose() => StopActive();

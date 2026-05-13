@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text.Json;
 using Mabipacade.DebugUi.Models;
 
@@ -8,6 +9,7 @@ public sealed class PacketDetailViewModel : ObservableObject
 {
     private PacketRowVm? _selectedRow;
     private string _decodedJson = "no packet selected";
+    private Mabipacade.DebugUi.Resolution.NameResolver _names = Mabipacade.DebugUi.Resolution.NameResolver.Empty;
 
     public PacketRowVm? SelectedRow
     {
@@ -27,6 +29,13 @@ public sealed class PacketDetailViewModel : ObservableObject
 
     public ObservableCollection<HexDumpLine> HexLines { get; } = new();
     public ObservableCollection<ElemTreeNode> ElemNodes { get; } = new();
+    public ObservableCollection<NameLookup> NameLookups { get; } = new();
+
+    public void SetNameResolver(Mabipacade.DebugUi.Resolution.NameResolver names)
+    {
+        _names = names;
+        Rebuild();
+    }
 
     private static readonly JsonSerializerOptions JsonOpts = new()
     {
@@ -38,6 +47,7 @@ public sealed class PacketDetailViewModel : ObservableObject
     {
         HexLines.Clear();
         ElemNodes.Clear();
+        NameLookups.Clear();
 
         if (_selectedRow is null) { DecodedJson = "no packet selected"; return; }
 
@@ -61,6 +71,15 @@ public sealed class PacketDetailViewModel : ObservableObject
                 if (e.Type != Core.Model.MessageElemType.Bin) continue;
                 foreach (var line in HexDumpLine.From(e.AsBytes())) HexLines.Add(line);
             }
+        }
+
+        var ids = Mabipacade.DebugUi.Resolution.DecodedSkillExtractor.ExtractSkillIds(packet.Decoded);
+        foreach (var id in ids.Distinct())
+        {
+            if (_names.TryResolveSkillFull(id, out var entry))
+                NameLookups.Add(new NameLookup(entry.SkillId, entry.EnglishName, entry.LocalName));
+            else
+                NameLookups.Add(new NameLookup(id, "?", "?"));
         }
     }
 }

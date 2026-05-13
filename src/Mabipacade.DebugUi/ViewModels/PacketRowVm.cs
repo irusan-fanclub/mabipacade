@@ -1,4 +1,5 @@
 using Mabipacade.Core.Model;
+using Mabipacade.DebugUi.Resolution;
 
 namespace Mabipacade.DebugUi.ViewModels;
 
@@ -10,8 +11,9 @@ public sealed class PacketRowVm
     public string Op { get; }
     public string EntityId { get; }
     public string TypeLabel { get; }
+    public string SkillName { get; }
 
-    public PacketRowVm(MabiPacket packet)
+    public PacketRowVm(MabiPacket packet, NameResolver? names = null)
     {
         Packet = packet;
         Time = packet.TimestampUtc.ToString("HH:mm:ss.fff");
@@ -19,5 +21,21 @@ public sealed class PacketRowVm
         Op = $"0x{packet.Op:X4}";
         EntityId = packet.EntityId.ToString();
         TypeLabel = packet.Decoded?.GetType().Name ?? "(L2)";
+
+        if (names is not null)
+        {
+            var ids = DecodedSkillExtractor.ExtractSkillIds(packet.Decoded);
+            var nameList = new List<string>();
+            foreach (var id in ids)
+            {
+                var n = names.TryResolveSkill(id);
+                if (n is not null) nameList.Add(n);
+            }
+            SkillName = nameList.Count == 0 ? string.Empty : string.Join(", ", nameList);
+        }
+        else
+        {
+            SkillName = string.Empty;
+        }
     }
 }
