@@ -16,6 +16,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool _isRunning;
     private string _activityState = "○ Stopped";
 
+    private System.Timers.Timer? _statsTimer;
+    private long _lastFrames;
+    private long _lastPackets;
+
     public bool IsRunning
     {
         get => _isRunning;
@@ -66,6 +70,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             PacketList.Clear();
             Detail.SelectedRow = null;
         });
+
+        _statsTimer = new System.Timers.Timer(1000) { AutoReset = true };
+        _statsTimer.Elapsed += OnStatsTick;
+        _statsTimer.Start();
     }
 
     public void OpenReplay(string pcapPath)
@@ -122,6 +130,26 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(ReplayTransport));
         ActivityState = "○ Stopped";
         IsRunning = false;
+        _lastFrames = 0;
+        _lastPackets = 0;
+        Status.UpdateCounters(0, 0, 0, 0);
+    }
+
+    private void OnStatsTick(object? sender, System.Timers.ElapsedEventArgs e)
+    {
+        var host = _activeHost;
+        if (host is null) return;
+        long packets = host.Metrics.TotalPackets;
+        long frames = host.Metrics.TotalFrames;
+        long pps = packets - _lastPackets;
+        long fps = frames - _lastFrames;
+        _lastPackets = packets;
+        _lastFrames = frames;
+        _dispatcher.BeginInvoke(() => Status.UpdateCounters(
+            totalPackets: packets,
+            badBody: host.Metrics.BadBodyCount,
+            framesPerSec: pps,
+            bytesPerSec: fps * 256));
     }
 
     private void Wire(PipelineHost host)
@@ -135,5 +163,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _nameResolver.Reload(settings);
     }
 
-    public void Dispose() => StopActive();
+    public void Dispose()
+    {
+        _statsTimer?.Stop();
+        _statsTimer?.Dispose();
+        StopActive();
+    }
 }
