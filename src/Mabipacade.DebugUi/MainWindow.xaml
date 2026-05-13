@@ -30,6 +30,8 @@
         </Border>
 
         <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem Content="{Binding ActivityState}" FontWeight="Bold"/>
+            <Separator/>
             <StatusBarItem Content="{Binding Status.ConnectionLabel}"/>
             <Separator/>
             <StatusBarItem Content="{Binding Status.PacketsPerSec, StringFormat={}{0} pps}"/>
@@ -48,6 +50,7 @@
                 <Button Content="&#9209;"  Command="{Binding ReplayTransport.StopCommand}"  Width="40" Margin="0,0,12,0"/>
                 <TextBlock Text="Rate" VerticalAlignment="Center" Margin="0,0,4,0"/>
                 <ComboBox SelectedValue="{Binding ReplayTransport.Rate}" Width="80" SelectedValuePath="Tag">
+                    <ComboBoxItem Content="Max"  Tag="10000.0"/>
                     <ComboBoxItem Content="0.5x" Tag="0.5"/>
                     <ComboBoxItem Content="1x"   Tag="1.0"/>
                     <ComboBoxItem Content="2x"   Tag="2.0"/>

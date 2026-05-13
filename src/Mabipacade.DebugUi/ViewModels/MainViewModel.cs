@@ -12,6 +12,27 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private ReplaySession? _replaySession;
     private LiveSession? _liveSession;
 
+    private bool _isRunning;
+    private string _activityState = "○ Stopped";
+
+    public bool IsRunning
+    {
+        get => _isRunning;
+        private set
+        {
+            if (!SetField(ref _isRunning, value)) return;
+            (StartLiveCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (StopCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (OpenReplayCommand as RelayCommand)?.RaiseCanExecuteChanged();
+        }
+    }
+
+    public string ActivityState
+    {
+        get => _activityState;
+        private set => SetField(ref _activityState, value);
+    }
+
     public SourceViewModel Source { get; } = new();
     public FilterViewModel Filter { get; } = new();
     public PacketListViewModel PacketList { get; }
@@ -29,9 +50,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _dispatcher = dispatcher;
         PacketList = new PacketListViewModel(Filter);
 
-        OpenReplayCommand = new RelayCommand(p => OpenReplay(p as string ?? Source.OpenPcapPath ?? ""));
-        StartLiveCommand = new RelayCommand(_ => StartLive());
-        StopCommand = new RelayCommand(_ => StopActive());
+        OpenReplayCommand = new RelayCommand(p => OpenReplay(p as string ?? Source.OpenPcapPath ?? ""), _ => !_isRunning);
+        StartLiveCommand = new RelayCommand(_ => StartLive(), _ => !_isRunning);
+        StopCommand = new RelayCommand(_ => StopActive(), _ => _isRunning);
         ClearCommand = new RelayCommand(_ =>
         {
             PacketList.Clear();
@@ -47,12 +68,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _replaySession = session;
         _activeHost = session.Host;
         ReplayTransport = new ReplayTransportViewModel(session.Transport);
+        ReplayTransport.Rate = 10000.0;
         OnPropertyChanged(nameof(ReplayTransport));
 
         Wire(session.Host);
         Source.Mode = SourceMode.Replay;
         Source.OpenPcapPath = pcapPath;
         _ = session.Host.StartAsync(CancellationToken.None);
+        ActivityState = "▶ Replay";
+        IsRunning = true;
     }
 
     public void StartLive()
@@ -66,10 +90,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Wire(session.Host);
             Source.Mode = SourceMode.Live;
             _ = session.Host.StartAsync(CancellationToken.None);
+            ActivityState = "● Live";
+            IsRunning = true;
         }
         catch (LiveSessionFactory.BootstrapException e)
         {
             Status.HandleEvent(new SessionEvent.SessionEnd(DateTime.UtcNow, "bootstrap: " + e.Message));
+            ActivityState = "○ Stopped (bootstrap failed)";
+            IsRunning = false;
         }
     }
 
@@ -83,6 +111,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _liveSession = null;
         ReplayTransport = null;
         OnPropertyChanged(nameof(ReplayTransport));
+        ActivityState = "○ Stopped";
+        IsRunning = false;
     }
 
     private void Wire(PipelineHost host)
