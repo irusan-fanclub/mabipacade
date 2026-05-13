@@ -41,7 +41,7 @@ internal static class MabiPacketFramer
         ulong entityId = BinaryPrimitives.ReadUInt64BigEndian(body.Slice(4, 8));
         var msg = body.Slice(12).ToArray();
 
-        slice = new MabiPacketSlice((ushort)op, entityId, msg, DateTime.UnixEpoch);
+        slice = new MabiPacketSlice((ushort)op, entityId, msg);
         consumed = (int)length;
         return FrameResult.Ok;
     }
