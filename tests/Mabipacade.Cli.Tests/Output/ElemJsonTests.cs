@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Mabipacade.Cli.Output;
+using Mabipacade.Core.Json;
 using Mabipacade.Core.Model;
 
 namespace Mabipacade.Cli.Tests.Output;

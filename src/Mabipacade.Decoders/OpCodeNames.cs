@@ -1,8 +1,6 @@
-using Mabipacade.Decoders;
+namespace Mabipacade.Decoders;
 
-namespace Mabipacade.Cli.Output;
-
-internal static class OpCodeNames
+public static class OpCodeNames
 {
     private static readonly Dictionary<ushort, string> _names = Enum
         .GetValues<OpCodes>()

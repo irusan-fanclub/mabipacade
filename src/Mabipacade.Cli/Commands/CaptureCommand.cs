@@ -1,9 +1,9 @@
 using System.CommandLine;
 using Mabipacade.Cli.Filters;
 using Mabipacade.Cli.Logging;
-using Mabipacade.Cli.Output;
 using Mabipacade.Cli.Recording;
 using Mabipacade.Core.Capture;
+using Mabipacade.Core.Json;
 using Mabipacade.Core.Pipeline;
 using Mabipacade.Core.Sources;
 using Mabipacade.Decoders;
@@ -88,7 +88,7 @@ internal static class CaptureCommand
         DefaultDecoders.RegisterAll(registry);
         var pipeline = new PacketPipeline(source, registry);
 
-        var writer = noStdout ? null : new NdjsonWriter(Console.Out);
+        var writer = noStdout ? null : new NdjsonWriter(Console.Out, OpCodeNames.TryGetName);
         pipeline.PacketReceived += (_, p) =>
         {
             if (!opFilter.Allows(p.Op)) return;

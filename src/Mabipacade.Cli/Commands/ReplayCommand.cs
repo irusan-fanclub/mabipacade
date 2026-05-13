@@ -1,7 +1,7 @@
 using System.CommandLine;
 using Mabipacade.Cli.Filters;
 using Mabipacade.Cli.Logging;
-using Mabipacade.Cli.Output;
+using Mabipacade.Core.Json;
 using Mabipacade.Core.Pipeline;
 using Mabipacade.Core.Sources;
 using Mabipacade.Decoders;
@@ -41,7 +41,7 @@ internal static class ReplayCommand
         try { opFilter = OpFilter.Parse(filterOpSpec); }
         catch (FormatException e) { StderrLogger.Error(e.Message); return 2; }
 
-        var writer = new NdjsonWriter(Console.Out);
+        var writer = new NdjsonWriter(Console.Out, OpCodeNames.TryGetName);
         using var source = new PcapFileFrameSource(input.FullName);
         var registry = new DecoderRegistry();
         DefaultDecoders.RegisterAll(registry);

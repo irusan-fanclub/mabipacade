@@ -1,4 +1,4 @@
-using Mabipacade.Cli.Output;
+using Mabipacade.Decoders;
 
 namespace Mabipacade.Cli.Tests.Output;
 

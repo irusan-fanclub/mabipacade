@@ -3,9 +3,9 @@ using System.Text.Json;
 using Mabipacade.Core.Diagnostics;
 using Mabipacade.Core.Model;
 
-namespace Mabipacade.Cli.Output;
+namespace Mabipacade.Core.Json;
 
-internal static class EnvelopeShape
+public static class EnvelopeShape
 {
     private static readonly JsonSerializerOptions PayloadOptions = new()
     {
@@ -13,7 +13,7 @@ internal static class EnvelopeShape
         WriteIndented = false,
     };
 
-    public static void WritePacket(Utf8JsonWriter w, MabiPacket p)
+    public static void WritePacket(Utf8JsonWriter w, MabiPacket p, Func<ushort, string?>? opNameLookup = null)
     {
         w.WriteStartObject();
         w.WriteString("kind", "packet");
@@ -21,7 +21,7 @@ internal static class EnvelopeShape
         w.WriteString("dir", p.Direction == Direction.Inbound ? "in" : "out");
         w.WriteString("op", $"0x{p.Op:X4}");
 
-        var name = OpCodeNames.TryGetName(p.Op);
+        var name = opNameLookup?.Invoke(p.Op);
         if (name is null) w.WriteNull("opName"); else w.WriteString("opName", name);
 
         w.WriteString("entityId", p.EntityId.ToString());

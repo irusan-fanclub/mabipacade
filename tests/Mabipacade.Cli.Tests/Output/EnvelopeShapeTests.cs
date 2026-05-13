@@ -1,7 +1,8 @@
 using System.Text.Json;
-using Mabipacade.Cli.Output;
+using Mabipacade.Core.Json;
 using Mabipacade.Core.Diagnostics;
 using Mabipacade.Core.Model;
+using Mabipacade.Decoders;
 using System.Net;
 
 namespace Mabipacade.Cli.Tests.Output;
@@ -13,7 +14,7 @@ public class EnvelopeShapeTests
         using var ms = new MemoryStream();
         using (var w = new Utf8JsonWriter(ms))
         {
-            EnvelopeShape.WritePacket(w, p);
+            EnvelopeShape.WritePacket(w, p, OpCodeNames.TryGetName);
         }
         return System.Text.Encoding.UTF8.GetString(ms.ToArray());
     }

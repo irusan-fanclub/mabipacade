@@ -1,6 +1,6 @@
 using System.Text;
 using System.Text.Json;
-using Mabipacade.Cli.Output;
+using Mabipacade.Core.Json;
 using Mabipacade.Core.Diagnostics;
 using Mabipacade.Core.Model;
 using System.Net;

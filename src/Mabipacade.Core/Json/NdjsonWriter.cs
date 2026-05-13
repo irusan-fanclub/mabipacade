@@ -2,16 +2,21 @@ using System.Text.Json;
 using Mabipacade.Core.Diagnostics;
 using Mabipacade.Core.Model;
 
-namespace Mabipacade.Cli.Output;
+namespace Mabipacade.Core.Json;
 
-internal sealed class NdjsonWriter
+public sealed class NdjsonWriter
 {
     private readonly TextWriter _out;
+    private readonly Func<ushort, string?>? _opNameLookup;
     private readonly object _lock = new();
 
-    public NdjsonWriter(TextWriter outWriter) { _out = outWriter; }
+    public NdjsonWriter(TextWriter outWriter, Func<ushort, string?>? opNameLookup = null)
+    {
+        _out = outWriter;
+        _opNameLookup = opNameLookup;
+    }
 
-    public void WritePacket(MabiPacket p) => WriteLine(w => EnvelopeShape.WritePacket(w, p));
+    public void WritePacket(MabiPacket p) => WriteLine(w => EnvelopeShape.WritePacket(w, p, _opNameLookup));
     public void WriteEvent(SessionEvent ev) => WriteLine(w => EnvelopeShape.WriteEvent(w, ev));
 
     private void WriteLine(Action<Utf8JsonWriter> writeBody)

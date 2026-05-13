@@ -1,6 +1,6 @@
 using System.Net;
 using System.Text;
-using Mabipacade.Cli.Output;
+using Mabipacade.Core.Json;
 using Mabipacade.Core.Diagnostics;
 using Mabipacade.Core.Pipeline;
 using Mabipacade.Core.Recording;

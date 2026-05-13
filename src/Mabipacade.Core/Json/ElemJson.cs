@@ -1,9 +1,9 @@
 using System.Text.Json;
 using Mabipacade.Core.Model;
 
-namespace Mabipacade.Cli.Output;
+namespace Mabipacade.Core.Json;
 
-internal static class ElemJson
+public static class ElemJson
 {
     public static void Write(Utf8JsonWriter w, MessageElem e)
     {
