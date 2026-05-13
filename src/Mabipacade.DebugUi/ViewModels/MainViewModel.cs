@@ -92,6 +92,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Source.OpenPcapPath = pcapPath;
         _ = session.Host.StartAsync(CancellationToken.None);
         ActivityState = "▶ Replay";
+        Status.SetConnection($"replay: {Path.GetFileName(pcapPath)}");
         IsRunning = true;
     }
 
@@ -107,11 +108,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Source.Mode = SourceMode.Live;
             _ = session.Host.StartAsync(CancellationToken.None);
             ActivityState = "● Live";
+            Status.SetConnection($"live {session.Endpoint.RemoteAddress}:{session.Endpoint.RemotePort}");
             IsRunning = true;
         }
         catch (LiveSessionFactory.BootstrapException e)
         {
-            Status.HandleEvent(new SessionEvent.SessionEnd(DateTime.UtcNow, "bootstrap: " + e.Message));
+            Status.SetConnection("bootstrap failed: " + e.Message);
             ActivityState = "○ Stopped (bootstrap failed)";
             IsRunning = false;
         }
@@ -129,6 +131,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ReplayTransport = null;
         OnPropertyChanged(nameof(ReplayTransport));
         ActivityState = "○ Stopped";
+        Status.SetConnection("disconnected");
         IsRunning = false;
         _lastFrames = 0;
         _lastPackets = 0;

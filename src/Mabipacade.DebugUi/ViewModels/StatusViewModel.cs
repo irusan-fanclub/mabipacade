@@ -35,4 +35,11 @@ public sealed class StatusViewModel : ObservableObject
         PacketsPerSec = framesPerSec;
         BytesPerSec = bytesPerSec;
     }
+
+    // Direct label override for Live/Replay start where no SessionEvent fires.
+    // LiveFrameSource doesn't itself emit ConnectionEstablished (CaptureSession.RunAsync
+    // would, but isn't wired into LiveSessionFactory yet); pcap replay has no real
+    // connection at all. MainViewModel calls this on Start/Stop transitions so the
+    // status bar reflects the actual UI state.
+    public void SetConnection(string label) => ConnectionLabel = label;
 }
