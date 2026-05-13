@@ -21,6 +21,7 @@ internal sealed class SessionRecorder : IDisposable
     private readonly NdjsonWriter _eventsWriter;
     private readonly DateTime _startedAt = DateTime.UtcNow;
     private readonly List<SessionEndpointRecord> _endpoints = new();
+    private readonly object _stateLock = new();
     private DateTime? _endedAt;
     private string? _currentRemote;
     private DateTime _currentSince;
@@ -49,15 +50,20 @@ internal sealed class SessionRecorder : IDisposable
     public void Stop(string reason)
     {
         if (_endedAt is not null) return;
-        _endedAt = DateTime.UtcNow;
-        if (_currentRemote is not null)
-        {
-            _endpoints.Add(new SessionEndpointRecord(_currentRemote, _currentSince, _endedAt));
-            _currentRemote = null;
-        }
-        _eventsWriter.WriteEvent(new SessionEvent.SessionEnd(_endedAt.Value, reason));
+        // Unsubscribe FIRST so no more events come in while we tear down.
         _source.FrameReceived -= OnFrame;
         _pipeline.SessionEventReceived -= OnEvent;
+
+        lock (_stateLock)
+        {
+            _endedAt = DateTime.UtcNow;
+            if (_currentRemote is not null)
+            {
+                _endpoints.Add(new SessionEndpointRecord(_currentRemote, _currentSince, _endedAt));
+                _currentRemote = null;
+            }
+        }
+        _eventsWriter.WriteEvent(new SessionEvent.SessionEnd(_endedAt!.Value, reason));
         _events.Flush();
         _events.Dispose();
         _pcap.Dispose();
@@ -72,23 +78,26 @@ internal sealed class SessionRecorder : IDisposable
     private void OnEvent(object? sender, SessionEvent ev)
     {
         _eventsWriter.WriteEvent(ev);
-        switch (ev)
+        lock (_stateLock)
         {
-            case SessionEvent.ConnectionEstablished s:
-                _currentRemote = $"{s.Remote.Address}:{s.Remote.Port}";
-                _currentSince = s.TimestampUtc;
-                break;
-            case SessionEvent.ConnectionLost s:
-                if (_currentRemote is not null)
-                {
-                    _endpoints.Add(new SessionEndpointRecord(_currentRemote, _currentSince, s.TimestampUtc));
-                    _currentRemote = null;
-                }
-                break;
-            case SessionEvent.ConnectionResumed s:
-                _currentRemote = $"{s.NewRemote.Address}:{s.NewRemote.Port}";
-                _currentSince = s.TimestampUtc;
-                break;
+            switch (ev)
+            {
+                case SessionEvent.ConnectionEstablished s:
+                    _currentRemote = $"{s.Remote.Address}:{s.Remote.Port}";
+                    _currentSince = s.TimestampUtc;
+                    break;
+                case SessionEvent.ConnectionLost s:
+                    if (_currentRemote is not null)
+                    {
+                        _endpoints.Add(new SessionEndpointRecord(_currentRemote, _currentSince, s.TimestampUtc));
+                        _currentRemote = null;
+                    }
+                    break;
+                case SessionEvent.ConnectionResumed s:
+                    _currentRemote = $"{s.NewRemote.Address}:{s.NewRemote.Port}";
+                    _currentSince = s.TimestampUtc;
+                    break;
+            }
         }
     }
 
