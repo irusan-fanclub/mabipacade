@@ -10,6 +10,8 @@ internal sealed class TcpReassembler
     private uint? _bufferStartSeq;
     private readonly List<TcpFrame> _pending = new();
 
+    public long BytesConsumed { get; private set; }
+
     public ReadOnlySpan<byte> GetBuffer() => CollectionsMarshal.AsSpan(_buffer);
 
     public void Feed(TcpFrame frame)
@@ -65,6 +67,7 @@ internal sealed class TcpReassembler
         if (count <= 0) return;
         if (count > _buffer.Count) count = _buffer.Count;
         _buffer.RemoveRange(0, count);
+        BytesConsumed += count;
         if (_bufferStartSeq is not null)
             _bufferStartSeq = _bufferStartSeq.Value + (uint)count;
     }

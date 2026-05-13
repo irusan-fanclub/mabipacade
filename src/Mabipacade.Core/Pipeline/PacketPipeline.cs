@@ -71,7 +71,7 @@ public sealed class PacketPipeline : IDisposable
                     return;
                 case FrameResult.FramingError:
                     _metrics.IncrementResync();
-                    SessionEventReceived?.Invoke(this, new SessionEvent.FrameResync(timestampUtc, 0, "framing error"));
+                    SessionEventReceived?.Invoke(this, new SessionEvent.FrameResync(timestampUtc, reassembler.BytesConsumed, "framing error"));
                     reassembler.Reset();
                     return;
             }
