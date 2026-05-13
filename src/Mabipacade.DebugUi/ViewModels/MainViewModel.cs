@@ -117,6 +117,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _activeHost = null;
         _replaySession = null;
         _liveSession = null;
+        ReplayTransport?.Dispose();
         ReplayTransport = null;
         OnPropertyChanged(nameof(ReplayTransport));
         ActivityState = "○ Stopped";

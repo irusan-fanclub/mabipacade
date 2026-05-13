@@ -3,9 +3,11 @@ using Mabipacade.Core.Replay;
 
 namespace Mabipacade.DebugUi.ViewModels;
 
-public sealed class ReplayTransportViewModel : ObservableObject
+public sealed class ReplayTransportViewModel : ObservableObject, IDisposable
 {
     private readonly ReplayTransport _transport;
+    private readonly EventHandler<ReplayState> _stateHandler;
+    private readonly EventHandler<TimeSpan> _positionHandler;
     private ReplayState _state;
     private TimeSpan _position;
     private double _rate = 1.0;
@@ -40,12 +42,20 @@ public sealed class ReplayTransportViewModel : ObservableObject
         _position = transport.Position;
         _rate = transport.Rate;
 
-        transport.StateChanged += (_, s) => State = s;
-        transport.PositionChanged += (_, p) => Position = p;
+        _stateHandler = (_, s) => State = s;
+        _positionHandler = (_, p) => Position = p;
+        transport.StateChanged += _stateHandler;
+        transport.PositionChanged += _positionHandler;
 
         PlayCommand = new RelayCommand(_ => transport.Play());
         PauseCommand = new RelayCommand(_ => transport.Pause());
         StopCommand = new RelayCommand(_ => transport.Stop());
         StepCommand = new RelayCommand(_ => transport.StepForward());
+    }
+
+    public void Dispose()
+    {
+        _transport.StateChanged -= _stateHandler;
+        _transport.PositionChanged -= _positionHandler;
     }
 }
