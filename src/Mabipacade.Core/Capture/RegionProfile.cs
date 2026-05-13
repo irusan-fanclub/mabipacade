@@ -6,6 +6,8 @@ public sealed record IpRange(IPAddress Start, IPAddress End)
 {
     public bool Contains(IPAddress addr)
     {
+        if (addr.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork) return false;
+        if (Start.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork) return false;
         long a = ToLong(addr);
         return a >= ToLong(Start) && a <= ToLong(End);
     }

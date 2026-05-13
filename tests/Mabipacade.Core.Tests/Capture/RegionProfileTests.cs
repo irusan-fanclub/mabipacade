@@ -41,4 +41,14 @@ public class RegionProfileTests
         Assert.True(RegionProfiles.Taiwan.Contains(IPAddress.Parse("61.218.1.2"), 11000));
         Assert.False(RegionProfiles.Taiwan.Contains(IPAddress.Parse("61.218.1.2"), 22222));
     }
+
+    [Fact]
+    public void Contains_Returns_False_ForIpv6()
+    {
+        var profile = new RegionProfile("test",
+            new[] { new IpRange(IPAddress.Parse("10.0.0.0"), IPAddress.Parse("10.0.0.255")) },
+            new ushort[] { 11000 });
+        Assert.False(profile.Contains(IPAddress.Parse("::1"), 11000));
+        Assert.False(profile.Contains(IPAddress.Parse("fe80::1"), 11000));
+    }
 }
