@@ -4,7 +4,7 @@ namespace Mabipacade.Core.Replay;
 
 public enum ReplayState { Stopped, Playing, Paused }
 
-public sealed class ReplayTransport : IDisposable
+public sealed class ReplayTransport : IFrameSource
 {
     private readonly IFrameSource _source;
     private readonly ManualResetEventSlim _playGate = new(initialState: false);
@@ -19,7 +19,8 @@ public sealed class ReplayTransport : IDisposable
     public TimeSpan Duration { get; set; } = TimeSpan.Zero;
     public double Rate { get; set; } = 1.0;
 
-    public event EventHandler<RawFrameEventArgs>? FrameEmitted;
+    public event EventHandler<RawFrameEventArgs>? FrameReceived;
+    public event EventHandler? EndOfStream;
     public event EventHandler<TimeSpan>? PositionChanged;
     public event EventHandler<ReplayState>? StateChanged;
 
@@ -28,6 +29,18 @@ public sealed class ReplayTransport : IDisposable
         _source = source;
         _source.FrameReceived += OnFrame;
         _source.EndOfStream += OnEos;
+    }
+
+    public Task StartAsync(CancellationToken ct)
+    {
+        Play();
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync()
+    {
+        Stop();
+        return Task.CompletedTask;
     }
 
     public void Play()
@@ -99,14 +112,14 @@ public sealed class ReplayTransport : IDisposable
                 if (wallDelta >= TimeSpan.FromMilliseconds(1))
                 {
                     try { Task.Delay(wallDelta, _cts!.Token).Wait(); }
-                    catch (AggregateException) { return; }
+                    catch (AggregateException ex) when (ex.InnerException is OperationCanceledException) { return; }
                 }
             }
         }
         _lastFrameTs = e.TimestampUtc;
         _isFirstFrame = false;
 
-        FrameEmitted?.Invoke(this, e);
+        FrameReceived?.Invoke(this, e);
         Position = e.TimestampUtc - DateTime.UnixEpoch;
         PositionChanged?.Invoke(this, Position);
 
@@ -118,6 +131,7 @@ public sealed class ReplayTransport : IDisposable
         State = ReplayState.Stopped;
         _playGate.Set();
         StateChanged?.Invoke(this, State);
+        EndOfStream?.Invoke(this, EventArgs.Empty);
         _completion?.TrySetResult();
     }
 
@@ -128,5 +142,6 @@ public sealed class ReplayTransport : IDisposable
         _cts?.Cancel();
         _cts?.Dispose();
         _playGate.Dispose();
+        _source.Dispose();
     }
 }

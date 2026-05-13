@@ -21,7 +21,7 @@ public class ReplayTransportTests
             (DateTime.UnixEpoch.AddSeconds(0.002), new byte[] { 3 }));
         var transport = new ReplayTransport(src) { Rate = 100 };
         var received = new List<byte[]>();
-        transport.FrameEmitted += (_, e) => received.Add(e.Data);
+        transport.FrameReceived += (_, e) => received.Add(e.Data);
 
         transport.Play();
         await transport.WaitForCompletionAsync();
@@ -48,7 +48,7 @@ public class ReplayTransportTests
         var transport = new ReplayTransport(src) { Rate = 1.0 };
 
         var received = new List<DateTime>();
-        transport.FrameEmitted += (_, e) => received.Add(DateTime.UtcNow);
+        transport.FrameReceived += (_, e) => received.Add(DateTime.UtcNow);
 
         var sw = System.Diagnostics.Stopwatch.StartNew();
         transport.Play();
@@ -87,7 +87,7 @@ public class ReplayTransportTests
         var transport = new ReplayTransport(src) { Rate = 100.0 };
 
         int received = 0;
-        transport.FrameEmitted += (_, _) => Interlocked.Increment(ref received);
+        transport.FrameReceived += (_, _) => Interlocked.Increment(ref received);
 
         transport.Play();
         src.EmitFrame(t0, new byte[] { 1 });

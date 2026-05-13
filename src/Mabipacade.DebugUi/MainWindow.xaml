@@ -43,7 +43,7 @@
                 <Button Content="&#9654;"  Command="{Binding ReplayTransport.PlayCommand}"  Width="40" Margin="0,0,2,0"/>
                 <Button Content="&#9646;&#9646;"  Command="{Binding ReplayTransport.PauseCommand}" Width="40" Margin="0,0,2,0"/>
                 <Button Content="&#9654;&#9654;"  Command="{Binding ReplayTransport.StepCommand}"  Width="40" Margin="0,0,2,0"/>
-                <Button Content="&#9646;&#9646;"  Command="{Binding ReplayTransport.StopCommand}"  Width="40" Margin="0,0,12,0"/>
+                <Button Content="&#9209;"  Command="{Binding ReplayTransport.StopCommand}"  Width="40" Margin="0,0,12,0"/>
                 <TextBlock Text="Rate" VerticalAlignment="Center" Margin="0,0,4,0"/>
                 <ComboBox SelectedValue="{Binding ReplayTransport.Rate}" Width="80" SelectedValuePath="Tag">
                     <ComboBoxItem Content="0.5x" Tag="0.5"/>

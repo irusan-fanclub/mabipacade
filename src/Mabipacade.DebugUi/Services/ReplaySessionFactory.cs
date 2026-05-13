@@ -5,18 +5,20 @@ using Mabipacade.Decoders;
 
 namespace Mabipacade.DebugUi.Services;
 
-public sealed record ReplaySession(PipelineHost Host, ReplayTransport Transport, IFrameSource Source);
+public sealed record ReplaySession(PipelineHost Host, ReplayTransport Transport);
 
 public static class ReplaySessionFactory
 {
     public static ReplaySession Create(string pcapPath, IUiDispatcher dispatcher)
     {
-        var source = new PcapFileFrameSource(pcapPath);
-        var transport = new ReplayTransport(source);
+        var rawSource = new PcapFileFrameSource(pcapPath);
+        var transport = new ReplayTransport(rawSource);
         var registry = new DecoderRegistry();
         DefaultDecoders.RegisterAll(registry);
-        var pipeline = new PacketPipeline(source, registry);
+        // Pipeline subscribes to the TRANSPORT, not the raw source.
+        // This way pause-gate + rate-throttle in the transport actually gate decoding.
+        var pipeline = new PacketPipeline(transport, registry);
         var host = new PipelineHost(pipeline, dispatcher);
-        return new ReplaySession(host, transport, source);
+        return new ReplaySession(host, transport);
     }
 }
