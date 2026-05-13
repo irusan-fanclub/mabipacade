@@ -1,6 +1,10 @@
 <Application x:Class="Mabipacade.DebugUi.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:Mabipacade.DebugUi.Views"
              StartupUri="MainWindow.xaml">
-    <Application.Resources/>
+    <Application.Resources>
+        <v:ModeToBoolConverter x:Key="ModeToBoolConverter"/>
+        <v:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+    </Application.Resources>
 </Application>
