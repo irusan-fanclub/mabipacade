@@ -55,6 +55,23 @@ Mabinogi 網路封包解析器 — C# library + CLI sidecar + WebSocket server +
 
 ---
 
+## 下載
+
+最新版：<https://github.com/irusan-fanclub/mabipacade/releases>
+
+下載 zip 後解開，三個 exe 隨意放（不依賴註冊表）。詳細步驟見 [INSTALL.md](INSTALL.md)。
+
+從原始碼編譯：
+```powershell
+git clone https://github.com/irusan-fanclub/mabipacade.git
+cd mabipacade
+dotnet test
+.\scripts\publish.ps1
+```
+產物在 `artifacts/`。
+
+---
+
 ## Quick Start
 
 ### 1. WPF GUI（最完整體驗）
@@ -365,3 +382,9 @@ tests/Mabipacade.Core.Tests/fixtures/known_good.pcap
 - **Design spec** — [`docs/superpowers/specs/2026-05-13-mabipacade-design.md`](docs/superpowers/specs/2026-05-13-mabipacade-design.md)
 - **Implementation plans** — `docs/superpowers/plans/`（M1 Core+Decoders、M2 Cli、M3 DebugUi）
 - **參考筆記** — `D:/Projects/Notes/mabinogi-packet-decoding/README.md`（wire format、opcode 表、踩過的雷）
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).

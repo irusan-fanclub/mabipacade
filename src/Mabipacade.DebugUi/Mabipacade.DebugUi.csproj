@@ -9,6 +9,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>Mabipacade.DebugUi</AssemblyName>
     <RootNamespace>Mabipacade.DebugUi</RootNamespace>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mabipacade.Core\Mabipacade.Core.csproj" />

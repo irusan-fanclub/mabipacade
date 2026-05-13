@@ -5,7 +5,13 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>true</IsPackable>
+    <PackageId>Mabipacade.Decoders</PackageId>
+    <Description>24 built-in L3 decoders for Mabipacade — combat, skills, entity, stats, misc — plus the OpCodes enum.</Description>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mabipacade.Core\Mabipacade.Core.csproj" />
   </ItemGroup>

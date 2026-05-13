@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <Authors>LiYu</Authors>
+    <Company>irusan-fanclub</Company>
+    <Copyright>Copyright (c) 2026 LiYu</Copyright>
+    <Version>0.1.0</Version>
+    <PackageProjectUrl>https://github.com/irusan-fanclub/mabipacade</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/irusan-fanclub/mabipacade.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>mabinogi;packet;parser;npcap;pcap</PackageTags>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+</Project>

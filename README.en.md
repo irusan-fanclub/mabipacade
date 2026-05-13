@@ -57,6 +57,23 @@ Windows-only, relies on Npcap to capture.
 
 ---
 
+## Download
+
+Latest release: <https://github.com/irusan-fanclub/mabipacade/releases>
+
+Unzip and place the three exes anywhere — they don't write to the registry. Full steps in [INSTALL.md](INSTALL.md).
+
+Build from source:
+```powershell
+git clone https://github.com/irusan-fanclub/mabipacade.git
+cd mabipacade
+dotnet test
+.\scripts\publish.ps1
+```
+Outputs land in `artifacts/`.
+
+---
+
 ## Quick Start
 
 ### 1. WPF GUI (most complete experience)
@@ -367,3 +384,9 @@ tests/Mabipacade.Core.Tests/fixtures/known_good.pcap
 - **Design spec** — [`docs/superpowers/specs/2026-05-13-mabipacade-design.md`](docs/superpowers/specs/2026-05-13-mabipacade-design.md)
 - **Implementation plans** — `docs/superpowers/plans/` (M1 Core+Decoders, M2 Cli, M3 DebugUi)
 - **Reference notes** — `D:/Projects/Notes/mabinogi-packet-decoding/README.md` (wire format, opcode table, traps the author hit)
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
