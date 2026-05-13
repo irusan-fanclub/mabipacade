@@ -102,7 +102,7 @@ public sealed class PacketPipeline : IDisposable
         }
 
         _metrics.IncrementPackets();
-        PacketReceived?.Invoke(this, new MabiPacket(timestampUtc, Direction.Inbound, slice.Op, slice.EntityId, elems, decoded));
+        PacketReceived?.Invoke(this, new MabiPacket(timestampUtc, Direction.Inbound, slice.Op, slice.EntityId, elems, decoded) { Body = slice.Body });
     }
 
     private void OnEos(object? sender, EventArgs e)

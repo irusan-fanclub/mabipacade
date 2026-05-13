@@ -13,6 +13,8 @@
                 <Button Content="Open pcap…" Click="OnOpenPcap" Margin="4,0"/>
                 <Button Content="Start Live" Command="{Binding StartLiveCommand}" Margin="4,0"/>
                 <Button Content="Stop"       Command="{Binding StopCommand}" Margin="4,0"/>
+                <Separator/>
+                <Button Content="Clear" Command="{Binding ClearCommand}" Margin="4,0"/>
             </ToolBar>
         </ToolBarTray>
 

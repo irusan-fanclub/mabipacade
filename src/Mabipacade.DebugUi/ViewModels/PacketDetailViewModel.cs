@@ -48,10 +48,19 @@ public sealed class PacketDetailViewModel : ObservableObject
 
         foreach (var n in ElemTreeNode.From(packet.Elems)) ElemNodes.Add(n);
 
-        foreach (var e in packet.Elems)
+        // Hex dump: prefer the raw message body (everything after op + entityId).
+        // Falls back to Bin elem bytes for packets constructed directly without a body.
+        if (packet.Body is { Length: > 0 } body)
         {
-            if (e.Type != Core.Model.MessageElemType.Bin) continue;
-            foreach (var line in HexDumpLine.From(e.AsBytes())) HexLines.Add(line);
+            foreach (var line in HexDumpLine.From(body)) HexLines.Add(line);
+        }
+        else
+        {
+            foreach (var e in packet.Elems)
+            {
+                if (e.Type != Core.Model.MessageElemType.Bin) continue;
+                foreach (var line in HexDumpLine.From(e.AsBytes())) HexLines.Add(line);
+            }
         }
     }
 }

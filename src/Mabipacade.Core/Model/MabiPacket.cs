@@ -6,4 +6,8 @@ public sealed record MabiPacket(
     ushort Op,
     ulong EntityId,
     IReadOnlyList<MessageElem> Elems,
-    object? Decoded);
+    object? Decoded)
+{
+    /// <summary>Raw message body bytes after op + entityId. Set by the pipeline; null when constructed directly without a body.</summary>
+    public byte[]? Body { get; init; }
+}

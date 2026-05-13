@@ -8,7 +8,9 @@ public class ReplayTransportViewModelTests
 {
     private sealed class FakeSource : IFrameSource
     {
+#pragma warning disable CS0067
         public event EventHandler<RawFrameEventArgs>? FrameReceived;
+#pragma warning restore CS0067
         public event EventHandler? EndOfStream;
         public Task StartAsync(CancellationToken ct) => Task.CompletedTask;
         public Task StopAsync() => Task.CompletedTask;

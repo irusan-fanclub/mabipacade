@@ -22,6 +22,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand OpenReplayCommand { get; }
     public ICommand StartLiveCommand { get; }
     public ICommand StopCommand { get; }
+    public ICommand ClearCommand { get; }
 
     public MainViewModel(IUiDispatcher dispatcher)
     {
@@ -31,6 +32,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OpenReplayCommand = new RelayCommand(p => OpenReplay(p as string ?? Source.OpenPcapPath ?? ""));
         StartLiveCommand = new RelayCommand(_ => StartLive());
         StopCommand = new RelayCommand(_ => StopActive());
+        ClearCommand = new RelayCommand(_ =>
+        {
+            PacketList.Clear();
+            Detail.SelectedRow = null;
+        });
     }
 
     public void OpenReplay(string pcapPath)
