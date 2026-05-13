@@ -68,7 +68,9 @@ dotnet run --project src/Mabipacade.DebugUi
 - 點 **Start Live** → 自動找 `Client.exe`、resolve 遊戲伺服器 endpoint、開 Npcap 抓
 - 中間 DataGrid 顯示 packet 列、右側 tabs 看 Decoded JSON / Elems / Hex / Names
 - 上方 status bar 顯示 ● Live / ▶ Replay / ○ Stopped
-- 名稱解析：把 `SkillInfo.xml` + `SkillInfo.taiwan.txt` 放任一資料夾，編輯 `settings.json`（跟 `.exe` 同層）加 `"xmlDataDirectory": "C:\\path\\to\\extracted"`，重啟。
+- 名稱解析：編輯 `settings.json`（跟 `.exe` 同層）加 `"xmlDataDirectory": "..."`。支援兩種 layout：
+  - **Flat** — `SkillInfo.xml` + `SkillInfo.taiwan.txt` 直接放在指定資料夾
+  - **解包後** — 指 `.it` 解出來的根目錄；loader 會自動到 `data/db/Skill/SkillInfo.xml` + `data/local/xml/SkillInfo.taiwan.txt` 找
 
 ### 2. CLI sidecar（Go / Python / JS 消費）
 
@@ -363,9 +365,3 @@ tests/Mabipacade.Core.Tests/fixtures/known_good.pcap
 - **Design spec** — [`docs/superpowers/specs/2026-05-13-mabipacade-design.md`](docs/superpowers/specs/2026-05-13-mabipacade-design.md)
 - **Implementation plans** — `docs/superpowers/plans/`（M1 Core+Decoders、M2 Cli、M3 DebugUi）
 - **參考筆記** — `D:/Projects/Notes/mabinogi-packet-decoding/README.md`（wire format、opcode 表、踩過的雷）
-
----
-
-## 名字
-
-「Mabipacade」= Mabi + (e)scapade / arcade — 隨便取的，沒深意。

@@ -70,7 +70,9 @@ Once the window opens:
 - Click **Start Live** → auto-finds `Client.exe`, resolves the game server endpoint, opens Npcap capture
 - The center DataGrid shows packets; the right side tabs show Decoded JSON / Elems / Hex / Names
 - The status bar shows ● Live / ▶ Replay / ○ Stopped
-- Name resolution: put `SkillInfo.xml` + `SkillInfo.taiwan.txt` in any folder, edit `settings.json` (next to the `.exe`) and add `"xmlDataDirectory": "C:\\path\\to\\extracted"`, then restart.
+- Name resolution: edit `settings.json` (next to the `.exe`) and add `"xmlDataDirectory": "..."`. Two layouts work:
+  - **Flat** — `SkillInfo.xml` + `SkillInfo.taiwan.txt` directly in the given directory
+  - **Extracted** — point at the root of an extracted `.it` pack; the loader picks up `data/db/Skill/SkillInfo.xml` + `data/local/xml/SkillInfo.taiwan.txt`
 
 ### 2. CLI sidecar (for Go / Python / JS consumers)
 
@@ -365,9 +367,3 @@ tests/Mabipacade.Core.Tests/fixtures/known_good.pcap
 - **Design spec** — [`docs/superpowers/specs/2026-05-13-mabipacade-design.md`](docs/superpowers/specs/2026-05-13-mabipacade-design.md)
 - **Implementation plans** — `docs/superpowers/plans/` (M1 Core+Decoders, M2 Cli, M3 DebugUi)
 - **Reference notes** — `D:/Projects/Notes/mabinogi-packet-decoding/README.md` (wire format, opcode table, traps the author hit)
-
----
-
-## The name
-
-"Mabipacade" = Mabi + (e)scapade / arcade — chosen on a whim, no deeper meaning.
