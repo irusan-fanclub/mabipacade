@@ -9,7 +9,7 @@ public class UseMotionDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0x6D62, new UseMotionDecoder().Op);
+        Assert.Equal((uint)0x00006D62, new UseMotionDecoder().Op);
     }
 
     [Fact]
@@ -24,7 +24,7 @@ public class UseMotionDecoderTests
             MessageElem.Short(0),
             MessageElem.Short(0),
         };
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x6D62, 0UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00006D62, 0UL, elems);
         var result = Assert.IsType<UseMotion>(new UseMotionDecoder().Decode(input));
         Assert.Equal((uint)25, result.Category);
         Assert.Equal((uint)21, result.Motion);

@@ -10,7 +10,7 @@ public class PacketPipelineTests
     public async Task EmitsPacket_ForSingleHandCraftedFrame()
     {
         // bodyTail must be a valid MessageElemReader body: [outer uvarint=0][count=0][reserved 0]
-        var mabiBytes = TestPacketBuilder.BuildNormal(op: 0x6984, entityId: 0UL, bodyTail: new byte[] { 0x00, 0x00, 0x00 });
+        var mabiBytes = TestPacketBuilder.BuildNormal(op: 0x00006984, entityId: 0UL, bodyTail: new byte[] { 0x00, 0x00, 0x00 });
         var frame = TestEthernetBuilder.WrapTcp(mabiBytes, srcPort: 11000, dstPort: 50000);
 
         var source = new PipelineFakeFrameSource(frame);
@@ -24,7 +24,7 @@ public class PacketPipelineTests
         await pipeline.StopAsync();
 
         Assert.Single(packets);
-        Assert.Equal((uint)0x6984, packets[0].Op);
+        Assert.Equal((uint)0x00006984, packets[0].Op);
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public class PacketPipelineTests
     [Fact]
     public async Task MetricsIncrement_OnValidPacket()
     {
-        var mabiBytes = TestPacketBuilder.BuildNormal(op: 0x6984, entityId: 0UL, bodyTail: new byte[] { 0x00, 0x00, 0x00 });
+        var mabiBytes = TestPacketBuilder.BuildNormal(op: 0x00006984, entityId: 0UL, bodyTail: new byte[] { 0x00, 0x00, 0x00 });
         var frame = TestEthernetBuilder.WrapTcp(mabiBytes, srcPort: 11000, dstPort: 50000);
 
         var source = new PipelineFakeFrameSource(frame);

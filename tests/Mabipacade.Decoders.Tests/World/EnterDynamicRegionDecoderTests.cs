@@ -9,7 +9,7 @@ public class EnterDynamicRegionDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0x9571, new EnterDynamicRegionDecoder().Op);
+        Assert.Equal((uint)0x00009571, new EnterDynamicRegionDecoder().Op);
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public class EnterDynamicRegionDecoderTests
             MessageElem.Int(43147),                // [12] posX
             MessageElem.Int(39954),                // [13] posY
         };
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x9571, 3458764513820540928UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00009571, 3458764513820540928UL, elems);
         var result = Assert.IsType<EnterDynamicRegion>(new EnterDynamicRegionDecoder().Decode(input));
         Assert.Equal((uint)35004, result.RegionId);
         Assert.Equal("DynamicRegion35004", result.RegionName);

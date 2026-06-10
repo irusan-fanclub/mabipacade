@@ -7,12 +7,12 @@ namespace Mabipacade.Decoders.Tests.Stats;
 public class EntityRelatedDecoderTests
 {
     [Fact]
-    public void Op_Matches() => Assert.Equal((uint)0x7534, new EntityRelatedDecoder().Op);
+    public void Op_Matches() => Assert.Equal((uint)0x00007534, new EntityRelatedDecoder().Op);
 
     [Fact]
     public void Decodes_CapturesBytes()
     {
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x7534, 0UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00007534, 0UL,
             new List<MessageElem>
             {
                 MessageElem.Byte(0), MessageElem.Byte(1), MessageElem.Byte(2),

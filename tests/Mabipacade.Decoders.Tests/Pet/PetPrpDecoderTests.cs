@@ -9,7 +9,7 @@ public class PetPrpDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0xAE0F, new PetPrpDecoder().Op);
+        Assert.Equal((uint)0x0000AE0F, new PetPrpDecoder().Op);
     }
 
     [Fact]
@@ -24,7 +24,7 @@ public class PetPrpDecoderTests
             MessageElem.Int(0),
             MessageElem.Int(0),
         };
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0xAE0F, 1UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x0000AE0F, 1UL, elems);
         var result = Assert.IsType<PetPrp>(new PetPrpDecoder().Decode(input));
         Assert.Equal(615u, result.Prp);
         Assert.Equal(0u, result.Stage);

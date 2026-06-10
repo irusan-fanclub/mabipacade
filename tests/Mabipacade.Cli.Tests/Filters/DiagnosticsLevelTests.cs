@@ -8,9 +8,9 @@ public class DiagnosticsLevelTests
     [Fact]
     public void Off_SuppressesDiagnosticEvents()
     {
-        Assert.False(DiagnosticsLevel.Off.PassesLive(new SessionEvent.BadBody(DateTime.UtcNow, 0x6984, 10)));
+        Assert.False(DiagnosticsLevel.Off.PassesLive(new SessionEvent.BadBody(DateTime.UtcNow, 0x00006984, 10)));
         Assert.False(DiagnosticsLevel.Off.PassesLive(new SessionEvent.FrameResync(DateTime.UtcNow, 0, "x")));
-        Assert.False(DiagnosticsLevel.Off.PassesLive(new SessionEvent.DecoderFailed(DateTime.UtcNow, 0x6984, "boom")));
+        Assert.False(DiagnosticsLevel.Off.PassesLive(new SessionEvent.DecoderFailed(DateTime.UtcNow, 0x00006984, "boom")));
     }
 
     [Fact]
@@ -24,7 +24,7 @@ public class DiagnosticsLevelTests
     [Fact]
     public void On_PassesEverything()
     {
-        Assert.True(DiagnosticsLevel.On.PassesLive(new SessionEvent.BadBody(DateTime.UtcNow, 0x6984, 10)));
+        Assert.True(DiagnosticsLevel.On.PassesLive(new SessionEvent.BadBody(DateTime.UtcNow, 0x00006984, 10)));
     }
 
     [Fact]

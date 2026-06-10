@@ -18,7 +18,7 @@ public sealed class PacketRowVm
         Packet = packet;
         Time = packet.TimestampUtc.ToString("HH:mm:ss.fff");
         Dir = packet.Direction == Direction.Inbound ? "in" : "out";
-        Op = $"0x{packet.Op:X4}";
+        Op = $"0x{packet.Op:X8}";
         EntityId = packet.EntityId.ToString();
         TypeLabel = packet.Decoded?.GetType().Name ?? "(L2)";
 

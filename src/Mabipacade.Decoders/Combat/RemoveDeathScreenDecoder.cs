@@ -6,6 +6,6 @@ public sealed record RemoveDeathScreen;
 
 public sealed class RemoveDeathScreenDecoder : IPacketDecoder
 {
-    public uint Op => 0x53FD;
+    public uint Op => 0x000053FD;
     public object Decode(DecoderInput input) => new RemoveDeathScreen();
 }

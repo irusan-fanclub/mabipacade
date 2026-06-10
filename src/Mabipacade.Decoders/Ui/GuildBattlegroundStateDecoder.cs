@@ -11,7 +11,7 @@ public sealed record GuildBattlegroundState(string Name, byte Flag1, string Stat
 
 public sealed class GuildBattlegroundStateDecoder : IPacketDecoder
 {
-    public uint Op => 0xA90E;
+    public uint Op => 0x0000A90E;
 
     public object Decode(DecoderInput input)
     {

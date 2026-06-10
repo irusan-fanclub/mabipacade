@@ -35,7 +35,7 @@ public class MovementDecodersTests
             MessageElem.Int(29), MessageElem.Int(4052),
             MessageElem.Float(6182), MessageElem.Float(4616), MessageElem.Byte(1),
         };
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x9093, 0UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00009093, 0UL, elems);
         var r = (PetMovementSync)new PetMovementSyncDecoder().Decode(input);
         Assert.Equal(29u, r.Action);
         Assert.Equal(4052u, r.Region);

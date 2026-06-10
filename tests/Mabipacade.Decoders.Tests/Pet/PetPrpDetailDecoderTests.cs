@@ -9,7 +9,7 @@ public class PetPrpDetailDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0xAE1B, new PetPrpDetailDecoder().Op);
+        Assert.Equal((uint)0x0000AE1B, new PetPrpDetailDecoder().Op);
     }
 
     [Fact]
@@ -20,7 +20,7 @@ public class PetPrpDetailDecoderTests
         var elems = new MessageElem[raw.Length];
         for (int i = 0; i < raw.Length; i++)
             elems[i] = MessageElem.Int(raw[i]);
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0xAE1B, 1UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x0000AE1B, 1UL, elems);
         var result = Assert.IsType<PetPrpDetail>(new PetPrpDetailDecoder().Decode(input));
         Assert.Equal(16, result.Values.Count);
         Assert.Equal(5524u, result.Values[0]);

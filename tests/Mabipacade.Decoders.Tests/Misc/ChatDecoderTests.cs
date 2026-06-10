@@ -9,7 +9,7 @@ public class ChatDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0x526C, new ChatDecoder().Op);
+        Assert.Equal((uint)0x0000526C, new ChatDecoder().Op);
     }
 
     [Fact]
@@ -20,7 +20,7 @@ public class ChatDecoderTests
             MessageElem.String("Alice"),
             MessageElem.String("Hello!")
         };
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x526C, 0UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x0000526C, 0UL, elems);
         var result = (Chat)new ChatDecoder().Decode(input);
         Assert.Equal("Alice", result.Sender);
         Assert.Equal("Hello!", result.Message);
@@ -29,7 +29,7 @@ public class ChatDecoderTests
     [Fact]
     public void Decodes_EmptyElems_FallsBackToEmptyStrings()
     {
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x526C, 0UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x0000526C, 0UL,
             Array.Empty<MessageElem>());
         var result = (Chat)new ChatDecoder().Decode(input);
         Assert.Equal("", result.Sender);

@@ -33,14 +33,14 @@ public class EnvelopeShapeTests
     public void Packet_ShapeAndFields()
     {
         var ts = new DateTime(2026, 5, 13, 8, 23, 11, 842, DateTimeKind.Utc);
-        var p = new MabiPacket(ts, Direction.Inbound, 0x6984, 12345UL,
+        var p = new MabiPacket(ts, Direction.Inbound, 0x00006984, 12345UL,
             new[] { MessageElem.Short(59000) }, Decoded: null);
         var json = RenderPacket(p);
 
         Assert.Contains("\"kind\":\"packet\"", json);
         Assert.Contains("\"ts\":\"2026-05-13T08:23:11.842Z\"", json);
         Assert.Contains("\"dir\":\"in\"", json);
-        Assert.Contains("\"op\":\"0x6984\"", json);
+        Assert.Contains("\"op\":\"0x00006984\"", json);
         Assert.Contains("\"opName\":\"PlayerSkillPrepareStart\"", json);
         Assert.Contains("\"entityId\":\"12345\"", json);
         Assert.Contains("\"type\":null", json);
@@ -53,7 +53,7 @@ public class EnvelopeShapeTests
     {
         var ts = DateTime.UtcNow;
         var pocoLike = new { skillId = 59000 };
-        var p = new MabiPacket(ts, Direction.Inbound, 0x6984, 1UL,
+        var p = new MabiPacket(ts, Direction.Inbound, 0x00006984, 1UL,
             Array.Empty<MessageElem>(), Decoded: pocoLike);
         var json = RenderPacket(p);
 
@@ -64,7 +64,7 @@ public class EnvelopeShapeTests
     [Fact]
     public void Packet_UnknownOp_OpNameNull()
     {
-        var p = new MabiPacket(DateTime.UtcNow, Direction.Inbound, 0xFFFF, 0UL,
+        var p = new MabiPacket(DateTime.UtcNow, Direction.Inbound, 0x0000FFFF, 0UL,
             Array.Empty<MessageElem>(), null);
         var json = RenderPacket(p);
         Assert.Contains("\"opName\":null", json);
@@ -98,10 +98,10 @@ public class EnvelopeShapeTests
     [Fact]
     public void Event_BadBody_IncludesOpAndLength()
     {
-        var ev = new SessionEvent.BadBody(DateTime.UtcNow, 0x9093, 42);
+        var ev = new SessionEvent.BadBody(DateTime.UtcNow, 0x00009093, 42);
         var json = RenderEvent(ev);
         Assert.Contains("\"type\":\"BadBody\"", json);
-        Assert.Contains("\"op\":\"0x9093\"", json);
+        Assert.Contains("\"op\":\"0x00009093\"", json);
         Assert.Contains("\"length\":42", json);
     }
 }

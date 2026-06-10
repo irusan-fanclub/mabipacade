@@ -7,12 +7,12 @@ namespace Mabipacade.Decoders.Tests.Stats;
 public class CreatureBodyUpdateDecoderTests
 {
     [Fact]
-    public void Op_Matches() => Assert.Equal((uint)0x520E, new CreatureBodyUpdateDecoder().Op);
+    public void Op_Matches() => Assert.Equal((uint)0x0000520E, new CreatureBodyUpdateDecoder().Op);
 
     [Fact]
     public void Decodes_Sample()
     {
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x520E, 0UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x0000520E, 0UL,
             new List<MessageElem>
             {
                 MessageElem.Long(123UL),

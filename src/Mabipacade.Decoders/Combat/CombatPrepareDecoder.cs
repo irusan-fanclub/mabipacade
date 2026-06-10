@@ -7,7 +7,7 @@ public sealed record CombatPrepare(byte Flag, ulong TargetId);
 
 public sealed class CombatPrepareDecoder : IPacketDecoder
 {
-    public uint Op => 0x7919;
+    public uint Op => 0x00007919;
 
     public object Decode(DecoderInput input)
     {

@@ -9,13 +9,13 @@ public class GuildBattlegroundStateDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0xA90E, new GuildBattlegroundStateDecoder().Op);
+        Assert.Equal((uint)0x0000A90E, new GuildBattlegroundStateDecoder().Op);
     }
 
     [Fact]
     public void Decodes_Sample()
     {
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0xA90E, 0UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x0000A90E, 0UL,
             new[]
             {
                 MessageElem.String("Senmag_Guild_BattleGround"),

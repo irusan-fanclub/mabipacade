@@ -14,7 +14,7 @@ public sealed record CreatureBodyUpdate(
 
 public sealed class CreatureBodyUpdateDecoder : IPacketDecoder
 {
-    public uint Op => 0x520E;
+    public uint Op => 0x0000520E;
 
     public object Decode(DecoderInput input)
     {

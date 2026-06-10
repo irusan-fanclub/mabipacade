@@ -7,7 +7,7 @@ public sealed record PetEquipSlotInit(byte Slot, byte Flag, uint A, uint B);
 
 public sealed class PetEquipSlotInitDecoder : IPacketDecoder
 {
-    public uint Op => 0x90A7;
+    public uint Op => 0x000090A7;
 
     public object Decode(DecoderInput input)
     {

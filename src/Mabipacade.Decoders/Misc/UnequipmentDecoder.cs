@@ -8,7 +8,7 @@ public sealed record Unequipment(uint Pocket);
 
 public sealed class UnequipmentDecoder : IPacketDecoder
 {
-    public uint Op => 0x59E7;
+    public uint Op => 0x000059E7;
 
     public object Decode(DecoderInput input)
     {

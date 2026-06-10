@@ -7,7 +7,7 @@ public sealed record PetStat55(int GroupId, IReadOnlyList<(int SubId, float Valu
 
 public sealed class PetStat55Decoder : IPacketDecoder
 {
-    public uint Op => 0xA032;
+    public uint Op => 0x0000A032;
 
     public object Decode(DecoderInput input)
     {

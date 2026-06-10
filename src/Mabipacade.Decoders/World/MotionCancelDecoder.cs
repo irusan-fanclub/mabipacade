@@ -7,7 +7,7 @@ public sealed record MotionCancel(byte Value);
 
 public sealed class MotionCancelDecoder : IPacketDecoder
 {
-    public uint Op => 0x6D66;
+    public uint Op => 0x00006D66;
 
     public object Decode(DecoderInput input)
     {

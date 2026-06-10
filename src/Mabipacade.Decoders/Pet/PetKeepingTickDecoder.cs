@@ -8,7 +8,7 @@ public sealed record PetKeepingTick(ulong SlotOrPetEid, ulong Filetime);
 
 public sealed class PetKeepingTickDecoder : IPacketDecoder
 {
-    public uint Op => 0x906F;
+    public uint Op => 0x0000906F;
 
     public object Decode(DecoderInput input)
     {

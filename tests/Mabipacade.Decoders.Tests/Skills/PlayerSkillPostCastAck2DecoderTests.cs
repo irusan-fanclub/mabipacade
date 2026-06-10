@@ -10,7 +10,7 @@ public class PlayerSkillPostCastAck2DecoderTests
     public void DecodesSkillId_FromFirstElem()
     {
         var decoder = new PlayerSkillPostCastAck2Decoder();
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x6989, 12345UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00006989, 12345UL,
             new[] { MessageElem.Short(59003) });
         var result = (PlayerSkillPostCastAck2)decoder.Decode(input);
         Assert.Equal((ushort)59003, result.SkillId);
@@ -19,6 +19,6 @@ public class PlayerSkillPostCastAck2DecoderTests
     [Fact]
     public void Op_Is6989()
     {
-        Assert.Equal((uint)0x6989, new PlayerSkillPostCastAck2Decoder().Op);
+        Assert.Equal((uint)0x00006989, new PlayerSkillPostCastAck2Decoder().Op);
     }
 }

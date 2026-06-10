@@ -7,7 +7,7 @@ public sealed record Disappear(ulong EntityId);
 
 public sealed class DisappearDecoder : IPacketDecoder
 {
-    public uint Op => 0x4E2A;
+    public uint Op => 0x00004E2A;
 
     public object Decode(DecoderInput input)
     {

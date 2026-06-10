@@ -9,13 +9,13 @@ public class PropDisappearsDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0x52D1, new PropDisappearsDecoder().Op);
+        Assert.Equal((uint)0x000052D1, new PropDisappearsDecoder().Op);
     }
 
     [Fact]
     public void Decodes_Sample()
     {
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x52D1, 0UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x000052D1, 0UL,
             new[] { MessageElem.Long(45467812285972655UL) });
 
         var result = (PropDisappears)new PropDisappearsDecoder().Decode(input);

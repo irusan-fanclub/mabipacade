@@ -10,7 +10,7 @@ public class CombatActionEndDecoderTests
     public void Decode_ReturnsCombatActionEnd()
     {
         var decoder = new CombatActionEndDecoder();
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x7925, 99UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00007925, 99UL,
             Array.Empty<MessageElem>());
         var result = decoder.Decode(input);
         Assert.IsType<CombatActionEnd>(result);
@@ -19,14 +19,14 @@ public class CombatActionEndDecoderTests
     [Fact]
     public void Op_Is7925()
     {
-        Assert.Equal((uint)0x7925, new CombatActionEndDecoder().Op);
+        Assert.Equal((uint)0x00007925, new CombatActionEndDecoder().Op);
     }
 
     [Fact]
     public void Decodes_ActionId()
     {
         var elems = new List<MessageElem> { MessageElem.Int(2930627) };
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x7925, 0UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00007925, 0UL, elems);
         var r = (CombatActionEnd)new CombatActionEndDecoder().Decode(input);
         Assert.Equal(2930627U, r.ActionId);
     }

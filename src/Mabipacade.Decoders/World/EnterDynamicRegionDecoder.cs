@@ -12,7 +12,7 @@ public sealed record EnterDynamicRegion(
 
 public sealed class EnterDynamicRegionDecoder : IPacketDecoder
 {
-    public uint Op => 0x9571;
+    public uint Op => 0x00009571;
 
     public object Decode(DecoderInput input)
     {

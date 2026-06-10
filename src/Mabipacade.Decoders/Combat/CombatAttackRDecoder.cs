@@ -7,7 +7,7 @@ public sealed record CombatAttackR(byte Result);
 
 public sealed class CombatAttackRDecoder : IPacketDecoder
 {
-    public uint Op => 0x7D01;
+    public uint Op => 0x00007D01;
 
     public object Decode(DecoderInput input)
     {

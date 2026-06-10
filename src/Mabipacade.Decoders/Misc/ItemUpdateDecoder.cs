@@ -8,7 +8,7 @@ public sealed record ItemUpdate(ulong InstanceId, ushort Short, uint Int);
 
 public sealed class ItemUpdateDecoder : IPacketDecoder
 {
-    public uint Op => 0x59EE;
+    public uint Op => 0x000059EE;
 
     public object Decode(DecoderInput input)
     {

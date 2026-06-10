@@ -13,7 +13,7 @@ public sealed record PropAppears(uint PropId, IReadOnlyList<byte> PropInfo);
 
 public sealed class PropAppearsDecoder : IPacketDecoder
 {
-    public uint Op => 0x52D0;
+    public uint Op => 0x000052D0;
 
     public object Decode(DecoderInput input)
     {

@@ -10,7 +10,7 @@ public class CombatActionDecoderTests
     public void Decode_ReturnsCombatAction()
     {
         var decoder = new CombatActionDecoder();
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x7924, 99UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00007924, 99UL,
             Array.Empty<MessageElem>());
         var result = decoder.Decode(input);
         Assert.IsType<CombatAction>(result);
@@ -19,6 +19,6 @@ public class CombatActionDecoderTests
     [Fact]
     public void Op_Is7924()
     {
-        Assert.Equal((uint)0x7924, new CombatActionDecoder().Op);
+        Assert.Equal((uint)0x00007924, new CombatActionDecoder().Op);
     }
 }

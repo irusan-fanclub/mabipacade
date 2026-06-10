@@ -11,7 +11,7 @@ public sealed record PropUpdate(string State, float Direction);
 
 public sealed class PropUpdateDecoder : IPacketDecoder
 {
-    public uint Op => 0x52D2;
+    public uint Op => 0x000052D2;
 
     public object Decode(DecoderInput input)
     {

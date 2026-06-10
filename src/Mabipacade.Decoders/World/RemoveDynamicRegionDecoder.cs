@@ -7,7 +7,7 @@ public sealed record RemoveDynamicRegion(uint RegionId);
 
 public sealed class RemoveDynamicRegionDecoder : IPacketDecoder
 {
-    public uint Op => 0x9572;
+    public uint Op => 0x00009572;
 
     public object Decode(DecoderInput input)
     {

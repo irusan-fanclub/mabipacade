@@ -7,7 +7,7 @@ public sealed record GetPetAiR(byte HasAi, string? AiFile);
 
 public sealed class GetPetAiRDecoder : IPacketDecoder
 {
-    public uint Op => 0xA8A3;
+    public uint Op => 0x0000A8A3;
 
     public object Decode(DecoderInput input)
     {

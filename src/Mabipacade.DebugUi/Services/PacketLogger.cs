@@ -160,7 +160,7 @@ public sealed class PacketLogger : IDisposable
         public static LogRecord From(MabiPacket p) => new(
             T: p.TimestampUtc.ToString("O"),
             Dir: p.Direction == Direction.Inbound ? "in" : "out",
-            Op: $"0x{p.Op:X4}",
+            Op: $"0x{p.Op:X8}",
             OpDec: p.Op,
             Eid: p.EntityId.ToString(),
             Type: p.Decoded?.GetType().Name,

@@ -6,7 +6,7 @@ namespace Mabipacade.DebugUi.Tests.Services;
 
 public class PacketLoggerTests
 {
-    private static MabiPacket Pkt(uint op = 0x7926, ulong eid = 42, params MessageElem[] elems) =>
+    private static MabiPacket Pkt(uint op = 0x00007926, ulong eid = 42, params MessageElem[] elems) =>
         new(DateTime.UtcNow, Direction.Inbound, op, eid, elems, null);
 
     [Fact]
@@ -27,13 +27,13 @@ public class PacketLoggerTests
             using var log = new PacketLogger();
             log.Start(path);
             log.Append(Pkt(elems: new[] { MessageElem.Short(7) }));
-            log.Append(Pkt(op: 0x526C, eid: 99, elems: new[] { MessageElem.String("hi") }));
+            log.Append(Pkt(op: 0x0000526C, eid: 99, elems: new[] { MessageElem.String("hi") }));
             log.Stop();
 
             var lines = File.ReadAllLines(path);
             Assert.Equal(2, lines.Length);
-            Assert.Contains("\"op\":\"0x7926\"", lines[0]);
-            Assert.Contains("\"op\":\"0x526C\"", lines[1]);
+            Assert.Contains("\"op\":\"0x00007926\"", lines[0]);
+            Assert.Contains("\"op\":\"0x0000526C\"", lines[1]);
             Assert.Contains("\"hi\"", lines[1]);
         }
         finally { Directory.Delete(temp, true); }

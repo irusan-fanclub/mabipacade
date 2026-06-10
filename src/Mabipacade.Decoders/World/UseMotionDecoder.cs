@@ -7,7 +7,7 @@ public sealed record UseMotion(uint Category, uint Motion);
 
 public sealed class UseMotionDecoder : IPacketDecoder
 {
-    public uint Op => 0x6D62;
+    public uint Op => 0x00006D62;
 
     public object Decode(DecoderInput input)
     {

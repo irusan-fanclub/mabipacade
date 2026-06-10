@@ -8,7 +8,7 @@ public sealed record StatUpdateUnk7533(ulong EntityId, byte Flag);
 
 public sealed class StatUpdateUnk7533Decoder : IPacketDecoder
 {
-    public uint Op => 0x7533;
+    public uint Op => 0x00007533;
 
     public object Decode(DecoderInput input)
     {

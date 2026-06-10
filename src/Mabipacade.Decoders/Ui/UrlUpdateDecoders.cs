@@ -45,42 +45,42 @@ internal static class UrlUpdateHelper
 
 public sealed class UrlUpdateChronicleDecoder : IPacketDecoder
 {
-    public uint Op => 0x65A2;
+    public uint Op => 0x000065A2;
     public object Decode(DecoderInput input) => new UrlUpdateChronicle(UrlUpdateHelper.CollectStrings(input));
 }
 
 public sealed class UrlUpdateAdvertiseDecoder : IPacketDecoder
 {
-    public uint Op => 0x65A3;
+    public uint Op => 0x000065A3;
     public object Decode(DecoderInput input) => new UrlUpdateAdvertise(UrlUpdateHelper.CollectStrings(input));
 }
 
 public sealed class UrlUpdateGuestbookDecoder : IPacketDecoder
 {
-    public uint Op => 0x65A4;
+    public uint Op => 0x000065A4;
     public object Decode(DecoderInput input) => new UrlUpdateGuestbook(UrlUpdateHelper.CollectStrings(input));
 }
 
 public sealed class UrlUpdatePvpDecoder : IPacketDecoder
 {
-    public uint Op => 0x65A5;
+    public uint Op => 0x000065A5;
     public object Decode(DecoderInput input) => new UrlUpdatePvp(UrlUpdateHelper.CollectStrings(input));
 }
 
 public sealed class UrlUpdateDungeonBoardDecoder : IPacketDecoder
 {
-    public uint Op => 0x65A6;
+    public uint Op => 0x000065A6;
     public object Decode(DecoderInput input) => new UrlUpdateDungeonBoard(UrlUpdateHelper.CollectStrings(input));
 }
 
 public sealed class UrlUpdateReserved1Decoder : IPacketDecoder
 {
-    public uint Op => 0x6652;
+    public uint Op => 0x00006652;
     public object Decode(DecoderInput input) => new UrlUpdateReserved1(UrlUpdateHelper.CollectStrings(input));
 }
 
 public sealed class UrlUpdateReserved2Decoder : IPacketDecoder
 {
-    public uint Op => 0x6653;
+    public uint Op => 0x00006653;
     public object Decode(DecoderInput input) => new UrlUpdateReserved2(UrlUpdateHelper.CollectStrings(input));
 }

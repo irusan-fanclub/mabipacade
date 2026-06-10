@@ -7,7 +7,7 @@ public sealed record PointsUpdate(uint Points);
 
 public sealed class PointsUpdateDecoder : IPacketDecoder
 {
-    public uint Op => 0x4E90;
+    public uint Op => 0x00004E90;
 
     public object Decode(DecoderInput input)
     {

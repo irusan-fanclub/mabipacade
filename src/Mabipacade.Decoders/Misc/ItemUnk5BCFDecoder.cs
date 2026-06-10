@@ -8,7 +8,7 @@ public sealed record ItemUnk5BCF(byte Flag);
 
 public sealed class ItemUnk5BCFDecoder : IPacketDecoder
 {
-    public uint Op => 0x5BCF;
+    public uint Op => 0x00005BCF;
 
     public object Decode(DecoderInput input)
     {

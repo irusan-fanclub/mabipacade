@@ -19,7 +19,7 @@ public class DecoderRegistryTests
         var reg = new DecoderRegistry();
         reg.Register(new FakeDecoder(0x6984));
         Assert.True(reg.TryGet(0x6984, out var d));
-        Assert.Equal((uint)0x6984, d!.Op);
+        Assert.Equal((uint)0x00006984, d!.Op);
     }
 
     [Fact]

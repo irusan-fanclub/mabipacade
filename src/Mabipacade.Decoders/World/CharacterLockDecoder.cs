@@ -7,7 +7,7 @@ public sealed record CharacterLock(uint Marker);
 
 public sealed class CharacterLockDecoder : IPacketDecoder
 {
-    public uint Op => 0x701E;
+    public uint Op => 0x0000701E;
 
     public object Decode(DecoderInput input)
     {

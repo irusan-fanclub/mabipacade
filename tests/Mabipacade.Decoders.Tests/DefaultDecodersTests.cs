@@ -22,12 +22,12 @@ public class DefaultDecodersTests
         var reg = new DecoderRegistry();
         DefaultDecoders.RegisterAll(reg);
         // Combat damage, entity appear, pet register, notice, prop, url.
-        Assert.Contains((uint)0x6984, reg.RegisteredOps);
-        Assert.Contains((uint)0x7926, reg.RegisteredOps);
-        Assert.Contains((uint)0x520C, reg.RegisteredOps);
-        Assert.Contains((uint)0x9024, reg.RegisteredOps);
-        Assert.Contains((uint)0x526D, reg.RegisteredOps);
-        Assert.Contains((uint)0x52D0, reg.RegisteredOps);
-        Assert.Contains((uint)0x65A2, reg.RegisteredOps);
+        Assert.Contains((uint)0x00006984, reg.RegisteredOps);
+        Assert.Contains((uint)0x00007926, reg.RegisteredOps);
+        Assert.Contains((uint)0x0000520C, reg.RegisteredOps);
+        Assert.Contains((uint)0x00009024, reg.RegisteredOps);
+        Assert.Contains((uint)0x0000526D, reg.RegisteredOps);
+        Assert.Contains((uint)0x000052D0, reg.RegisteredOps);
+        Assert.Contains((uint)0x000065A2, reg.RegisteredOps);
     }
 }

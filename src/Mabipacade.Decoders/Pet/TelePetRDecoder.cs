@@ -7,7 +7,7 @@ public sealed record TelePetR(byte Success, ulong PetId);
 
 public sealed class TelePetRDecoder : IPacketDecoder
 {
-    public uint Op => 0x9034;
+    public uint Op => 0x00009034;
 
     public object Decode(DecoderInput input)
     {

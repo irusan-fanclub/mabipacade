@@ -8,7 +8,7 @@ public sealed record PetPrp(uint Prp, uint Stage, uint C, uint D);
 
 public sealed class PetPrpDecoder : IPacketDecoder
 {
-    public uint Op => 0xAE0F;
+    public uint Op => 0x0000AE0F;
 
     public object Decode(DecoderInput input)
     {

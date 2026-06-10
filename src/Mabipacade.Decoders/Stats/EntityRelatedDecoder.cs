@@ -7,7 +7,7 @@ public sealed record EntityRelated(IReadOnlyList<byte> Bytes);
 
 public sealed class EntityRelatedDecoder : IPacketDecoder
 {
-    public uint Op => 0x7534;
+    public uint Op => 0x00007534;
 
     public object Decode(DecoderInput input)
     {

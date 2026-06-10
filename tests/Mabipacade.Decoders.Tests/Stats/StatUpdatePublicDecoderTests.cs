@@ -7,13 +7,13 @@ namespace Mabipacade.Decoders.Tests.Stats;
 public class StatUpdatePublicDecoderTests
 {
     [Fact]
-    public void Op_Matches() => Assert.Equal((uint)0x7532, new StatUpdatePublicDecoder().Op);
+    public void Op_Matches() => Assert.Equal((uint)0x00007532, new StatUpdatePublicDecoder().Op);
 
     [Fact]
     public void Decodes_MixedTypeStatPairs()
     {
         // count=2: (Int 5 -> Byte 7), (Int 9 -> Long 123456789)
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x7532, 0UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00007532, 0UL,
             new List<MessageElem>
             {
                 MessageElem.Byte(2),

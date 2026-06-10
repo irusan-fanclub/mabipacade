@@ -7,7 +7,7 @@ public sealed record PetFarewell;
 
 public sealed class PetFarewellDecoder : IPacketDecoder
 {
-    public uint Op => 0xAD04;
+    public uint Op => 0x0000AD04;
 
     public object Decode(DecoderInput input) => new PetFarewell();
 }

@@ -7,7 +7,7 @@ public sealed record EnterRegionRequestR(byte Success, ulong EntityId, ulong Fil
 
 public sealed class EnterRegionRequestRDecoder : IPacketDecoder
 {
-    public uint Op => 0x659C;
+    public uint Op => 0x0000659C;
 
     public object Decode(DecoderInput input)
     {

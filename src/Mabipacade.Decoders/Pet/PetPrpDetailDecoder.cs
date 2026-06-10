@@ -8,7 +8,7 @@ public sealed record PetPrpDetail(IReadOnlyList<uint> Values);
 
 public sealed class PetPrpDetailDecoder : IPacketDecoder
 {
-    public uint Op => 0xAE1B;
+    public uint Op => 0x0000AE1B;
 
     public object Decode(DecoderInput input)
     {

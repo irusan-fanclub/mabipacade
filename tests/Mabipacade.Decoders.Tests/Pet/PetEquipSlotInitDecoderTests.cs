@@ -9,7 +9,7 @@ public class PetEquipSlotInitDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0x90A7, new PetEquipSlotInitDecoder().Op);
+        Assert.Equal((uint)0x000090A7, new PetEquipSlotInitDecoder().Op);
     }
 
     [Fact]
@@ -22,7 +22,7 @@ public class PetEquipSlotInitDecoderTests
             MessageElem.Int(0),
             MessageElem.Int(0),
         };
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x90A7, 1UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x000090A7, 1UL, elems);
         var result = Assert.IsType<PetEquipSlotInit>(new PetEquipSlotInitDecoder().Decode(input));
         Assert.Equal((byte)6, result.Slot);
         Assert.Equal((byte)1, result.Flag);

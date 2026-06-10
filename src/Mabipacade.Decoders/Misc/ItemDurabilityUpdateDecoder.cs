@@ -8,7 +8,7 @@ public sealed record ItemDurabilityUpdate(ulong InstanceId, uint Durability);
 
 public sealed class ItemDurabilityUpdateDecoder : IPacketDecoder
 {
-    public uint Op => 0x5BD5;
+    public uint Op => 0x00005BD5;
 
     public object Decode(DecoderInput input)
     {

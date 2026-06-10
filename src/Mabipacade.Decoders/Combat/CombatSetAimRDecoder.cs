@@ -7,7 +7,7 @@ public sealed record CombatSetAimR(byte Flag);
 
 public sealed class CombatSetAimRDecoder : IPacketDecoder
 {
-    public uint Op => 0x791E;
+    public uint Op => 0x0000791E;
 
     public object Decode(DecoderInput input)
     {

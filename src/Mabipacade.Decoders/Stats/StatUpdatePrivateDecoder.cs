@@ -7,7 +7,7 @@ public sealed record StatUpdatePrivate(IReadOnlyList<(uint StatId, double Value)
 
 public sealed class StatUpdatePrivateDecoder : IPacketDecoder
 {
-    public uint Op => 0x7530;
+    public uint Op => 0x00007530;
 
     public object Decode(DecoderInput input) =>
         new StatUpdatePrivate(StatUpdateParser.Parse(input.Elems));

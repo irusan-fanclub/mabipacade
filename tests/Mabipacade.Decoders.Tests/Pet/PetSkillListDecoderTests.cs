@@ -9,7 +9,7 @@ public class PetSkillListDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0x69A4, new PetSkillListDecoder().Op);
+        Assert.Equal((uint)0x000069A4, new PetSkillListDecoder().Op);
     }
 
     [Fact]
@@ -21,7 +21,7 @@ public class PetSkillListDecoderTests
             MessageElem.Short(20002), MessageElem.Byte(1),
             MessageElem.Short(50002), MessageElem.Byte(1),
         };
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x69A4, 4504699139850743UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x000069A4, 4504699139850743UL, elems);
         var result = Assert.IsType<PetSkillList>(new PetSkillListDecoder().Decode(input));
         Assert.Equal(3, result.Skills.Count);
         Assert.Equal(((ushort)10004, (byte)1), result.Skills[0]);

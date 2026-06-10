@@ -10,7 +10,7 @@ public sealed record PropDisappears(ulong PropEid);
 
 public sealed class PropDisappearsDecoder : IPacketDecoder
 {
-    public uint Op => 0x52D1;
+    public uint Op => 0x000052D1;
 
     public object Decode(DecoderInput input)
     {

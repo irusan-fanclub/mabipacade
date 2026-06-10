@@ -7,7 +7,7 @@ public sealed record PetRegister(ulong PetId, byte Flag);
 
 public sealed class PetRegisterDecoder : IPacketDecoder
 {
-    public uint Op => 0x9024;
+    public uint Op => 0x00009024;
 
     public object Decode(DecoderInput input)
     {

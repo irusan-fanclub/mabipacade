@@ -7,13 +7,13 @@ namespace Mabipacade.Decoders.Tests.Stats;
 public class StatUpdatePrivateDecoderTests
 {
     [Fact]
-    public void Op_Matches() => Assert.Equal((uint)0x7530, new StatUpdatePrivateDecoder().Op);
+    public void Op_Matches() => Assert.Equal((uint)0x00007530, new StatUpdatePrivateDecoder().Op);
 
     [Fact]
     public void Decodes_MixedTypeStatPairs()
     {
         // count=3: (Int 28 -> Float 7370.07), (Int 32 -> Float 5392), (Int 94 -> Int 100)
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x7530, 0UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00007530, 0UL,
             new List<MessageElem>
             {
                 MessageElem.Byte(3),
@@ -37,7 +37,7 @@ public class StatUpdatePrivateDecoderTests
     public void Decodes_StopsOnMismatch()
     {
         // count claims 3 but only one valid pair before a String value breaks it.
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x7530, 0UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00007530, 0UL,
             new List<MessageElem>
             {
                 MessageElem.Byte(3),
@@ -55,7 +55,7 @@ public class StatUpdatePrivateDecoderTests
     [Fact]
     public void Decodes_EmptyWhenNoCount()
     {
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x7530, 0UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00007530, 0UL,
             Array.Empty<MessageElem>());
         var r = (StatUpdatePrivate)new StatUpdatePrivateDecoder().Decode(input);
         Assert.Empty(r.Stats);

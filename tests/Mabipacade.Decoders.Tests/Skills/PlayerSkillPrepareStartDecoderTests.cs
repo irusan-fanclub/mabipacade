@@ -10,7 +10,7 @@ public class PlayerSkillPrepareStartDecoderTests
     public void DecodesSkillId_FromFirstElem()
     {
         var decoder = new PlayerSkillPrepareStartDecoder();
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x6984, 12345UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00006984, 12345UL,
             new[] { MessageElem.Short(59000) });
         var result = (PlayerSkillPrepareStart)decoder.Decode(input);
         Assert.Equal((ushort)59000, result.SkillId);
@@ -19,6 +19,6 @@ public class PlayerSkillPrepareStartDecoderTests
     [Fact]
     public void Op_Is6984()
     {
-        Assert.Equal((uint)0x6984, new PlayerSkillPrepareStartDecoder().Op);
+        Assert.Equal((uint)0x00006984, new PlayerSkillPrepareStartDecoder().Op);
     }
 }

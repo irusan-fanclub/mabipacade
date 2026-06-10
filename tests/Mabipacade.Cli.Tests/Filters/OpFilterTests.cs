@@ -15,7 +15,7 @@ public class OpFilterTests
     [Fact]
     public void Hex_CommaSeparated_LimitsToList()
     {
-        var f = OpFilter.Parse("0x6984,0x7926");
+        var f = OpFilter.Parse("0x00006984,0x00007926");
         Assert.True(f.Allows(0x6984));
         Assert.True(f.Allows(0x7926));
         Assert.False(f.Allows(0x6985));
@@ -24,7 +24,7 @@ public class OpFilterTests
     [Fact]
     public void Whitespace_Tolerated()
     {
-        var f = OpFilter.Parse("0x6984 , 0x7926");
+        var f = OpFilter.Parse("0x6984 , 0x00007926");
         Assert.True(f.Allows(0x6984));
         Assert.True(f.Allows(0x7926));
     }

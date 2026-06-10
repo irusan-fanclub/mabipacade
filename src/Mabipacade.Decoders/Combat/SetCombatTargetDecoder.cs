@@ -7,7 +7,7 @@ public sealed record SetCombatTarget(ulong TargetId, byte Unknown, string Extra)
 
 public sealed class SetCombatTargetDecoder : IPacketDecoder
 {
-    public uint Op => 0x7920;
+    public uint Op => 0x00007920;
 
     public object Decode(DecoderInput input)
     {

@@ -10,7 +10,7 @@ public sealed record RegionStat(uint RegionId, uint Value);
 
 public sealed class RegionStatDecoder : IPacketDecoder
 {
-    public uint Op => 0xA93B;
+    public uint Op => 0x0000A93B;
 
     public object Decode(DecoderInput input)
     {

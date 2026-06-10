@@ -8,7 +8,7 @@ public sealed record PetUnk9097(ulong Value);
 
 public sealed class PetUnk9097Decoder : IPacketDecoder
 {
-    public uint Op => 0x9097;
+    public uint Op => 0x00009097;
 
     public object Decode(DecoderInput input)
     {

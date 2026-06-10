@@ -9,7 +9,7 @@ public class PropAppearsDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0x52D0, new PropAppearsDecoder().Op);
+        Assert.Equal((uint)0x000052D0, new PropAppearsDecoder().Op);
     }
 
     [Fact]
@@ -23,7 +23,7 @@ public class PropAppearsDecoderTests
             0x00, 0x00, 0x50, 0x00, // tail
         };
 
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x52D0, 0UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x000052D0, 0UL,
             new[]
             {
                 MessageElem.Long(45467812285972655UL),

@@ -53,7 +53,7 @@ public sealed class PacketDetailViewModel : ObservableObject
 
         var packet = _selectedRow.Packet;
         DecodedJson = packet.Decoded is null
-            ? $"no decoder registered for op 0x{packet.Op:X4}"
+            ? $"no decoder registered for op 0x{packet.Op:X8}"
             : JsonSerializer.Serialize(packet.Decoded, packet.Decoded.GetType(), JsonOpts);
 
         foreach (var n in ElemTreeNode.From(packet.Elems)) ElemNodes.Add(n);

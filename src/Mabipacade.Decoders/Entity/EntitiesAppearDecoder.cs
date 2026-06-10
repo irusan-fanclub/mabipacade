@@ -6,6 +6,6 @@ public sealed record EntitiesAppear;
 
 public sealed class EntitiesAppearDecoder : IPacketDecoder
 {
-    public uint Op => 0x5334;
+    public uint Op => 0x00005334;
     public object Decode(DecoderInput input) => new EntitiesAppear();
 }

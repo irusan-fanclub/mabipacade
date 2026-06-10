@@ -7,7 +7,7 @@ public sealed record PetSkillList(IReadOnlyList<(ushort SkillId, byte Rank)> Ski
 
 public sealed class PetSkillListDecoder : IPacketDecoder
 {
-    public uint Op => 0x69A4;
+    public uint Op => 0x000069A4;
 
     public object Decode(DecoderInput input)
     {

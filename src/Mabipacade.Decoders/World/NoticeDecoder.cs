@@ -7,7 +7,7 @@ public sealed record Notice(string Message, uint? Duration);
 
 public sealed class NoticeDecoder : IPacketDecoder
 {
-    public uint Op => 0x526D;
+    public uint Op => 0x0000526D;
 
     public object Decode(DecoderInput input)
     {

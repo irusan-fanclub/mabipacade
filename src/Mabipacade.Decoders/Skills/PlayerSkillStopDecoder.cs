@@ -6,6 +6,6 @@ public sealed record PlayerSkillStop;
 
 public sealed class PlayerSkillStopDecoder : IPacketDecoder
 {
-    public uint Op => 0x698B;
+    public uint Op => 0x0000698B;
     public object Decode(DecoderInput input) => new PlayerSkillStop();
 }

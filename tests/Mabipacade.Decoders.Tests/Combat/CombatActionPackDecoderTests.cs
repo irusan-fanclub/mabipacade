@@ -11,7 +11,7 @@ public class CombatActionPackDecoderTests
     {
         var decoder = new CombatActionPackDecoder();
         ulong entityId = 987654321UL;
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x7926, entityId,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00007926, entityId,
             Array.Empty<MessageElem>());
         var result = (CombatActionPack)decoder.Decode(input);
         Assert.Equal(entityId, result.AttackerId);
@@ -21,7 +21,7 @@ public class CombatActionPackDecoderTests
     public void Decode_ReturnsEmptySubList()
     {
         var decoder = new CombatActionPackDecoder();
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x7926, 1UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00007926, 1UL,
             Array.Empty<MessageElem>());
         var result = (CombatActionPack)decoder.Decode(input);
         Assert.Empty(result.Sub);
@@ -30,6 +30,6 @@ public class CombatActionPackDecoderTests
     [Fact]
     public void Op_Is7926()
     {
-        Assert.Equal((uint)0x7926, new CombatActionPackDecoder().Op);
+        Assert.Equal((uint)0x00007926, new CombatActionPackDecoder().Op);
     }
 }

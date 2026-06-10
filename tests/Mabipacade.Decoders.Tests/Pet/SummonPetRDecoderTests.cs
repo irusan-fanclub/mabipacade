@@ -9,7 +9,7 @@ public class SummonPetRDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0x902D, new SummonPetRDecoder().Op);
+        Assert.Equal((uint)0x0000902D, new SummonPetRDecoder().Op);
     }
 
     [Fact]
@@ -20,7 +20,7 @@ public class SummonPetRDecoderTests
             MessageElem.Byte(1),
             MessageElem.Long(4504699139850743UL),
         };
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x902D, 4503599628180874UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x0000902D, 4503599628180874UL, elems);
         var result = Assert.IsType<SummonPetR>(new SummonPetRDecoder().Decode(input));
         Assert.Equal((byte)1, result.Active);
         Assert.Equal(4504699139850743UL, result.PetId);
@@ -30,7 +30,7 @@ public class SummonPetRDecoderTests
     public void Decodes_FailureWithoutPetId()
     {
         var elems = new[] { MessageElem.Byte(0) };
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x902D, 4503599628180874UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x0000902D, 4503599628180874UL, elems);
         var result = Assert.IsType<SummonPetR>(new SummonPetRDecoder().Decode(input));
         Assert.Equal((byte)0, result.Active);
         Assert.Equal(0UL, result.PetId);

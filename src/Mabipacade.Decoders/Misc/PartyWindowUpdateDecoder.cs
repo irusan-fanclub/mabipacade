@@ -6,6 +6,6 @@ public sealed record PartyWindowUpdate;
 
 public sealed class PartyWindowUpdateDecoder : IPacketDecoder
 {
-    public uint Op => 0xA43C;
+    public uint Op => 0x0000A43C;
     public object Decode(DecoderInput input) => new PartyWindowUpdate();
 }

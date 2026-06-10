@@ -7,7 +7,7 @@ public sealed record PetUnregister(ulong PetId);
 
 public sealed class PetUnregisterDecoder : IPacketDecoder
 {
-    public uint Op => 0x9025;
+    public uint Op => 0x00009025;
 
     public object Decode(DecoderInput input)
     {

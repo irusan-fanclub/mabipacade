@@ -7,7 +7,7 @@ public sealed record CombatUsedSkill(ushort SkillId);
 
 public sealed class CombatUsedSkillDecoder : IPacketDecoder
 {
-    public uint Op => 0x7927;
+    public uint Op => 0x00007927;
 
     public object Decode(DecoderInput input)
     {

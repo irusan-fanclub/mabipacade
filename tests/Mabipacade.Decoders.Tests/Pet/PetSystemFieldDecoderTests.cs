@@ -9,7 +9,7 @@ public class PetSystemFieldDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0x909A, new PetSystemFieldDecoder().Op);
+        Assert.Equal((uint)0x0000909A, new PetSystemFieldDecoder().Op);
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public class PetSystemFieldDecoderTests
             MessageElem.Byte(0),  // 16
             MessageElem.Byte(0),  // 17
         };
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x909A, 1UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x0000909A, 1UL, elems);
         var result = Assert.IsType<PetSystemField>(new PetSystemFieldDecoder().Decode(input));
         Assert.Equal((byte)1, result.Flag1);
         Assert.Equal((byte)1, result.Flag2);

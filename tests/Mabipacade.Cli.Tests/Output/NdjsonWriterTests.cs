@@ -16,10 +16,10 @@ public class NdjsonWriterTests
             var writer = new NdjsonWriter(sw);
             writer.WritePacket(new MabiPacket(
                 new DateTime(2026, 5, 13, 0, 0, 0, DateTimeKind.Utc),
-                Direction.Inbound, 0x6984, 1UL, Array.Empty<MessageElem>(), null));
+                Direction.Inbound, 0x00006984, 1UL, Array.Empty<MessageElem>(), null));
             writer.WritePacket(new MabiPacket(
                 new DateTime(2026, 5, 13, 0, 0, 1, DateTimeKind.Utc),
-                Direction.Inbound, 0x6985, 2UL, Array.Empty<MessageElem>(), null));
+                Direction.Inbound, 0x00006985, 2UL, Array.Empty<MessageElem>(), null));
         }
         var lines = sb.ToString().Split('\n', StringSplitOptions.RemoveEmptyEntries);
         Assert.Equal(2, lines.Length);
@@ -35,7 +35,7 @@ public class NdjsonWriterTests
         {
             var writer = new NdjsonWriter(sw);
             writer.WriteEvent(new SessionEvent.SessionStart(DateTime.UtcNow, "tw", null));
-            writer.WritePacket(new MabiPacket(DateTime.UtcNow, Direction.Inbound, 0x6984, 0UL, Array.Empty<MessageElem>(), null));
+            writer.WritePacket(new MabiPacket(DateTime.UtcNow, Direction.Inbound, 0x00006984, 0UL, Array.Empty<MessageElem>(), null));
             writer.WriteEvent(new SessionEvent.SessionEnd(DateTime.UtcNow, "UserStop"));
         }
         var lines = sb.ToString().Split('\n', StringSplitOptions.RemoveEmptyEntries);

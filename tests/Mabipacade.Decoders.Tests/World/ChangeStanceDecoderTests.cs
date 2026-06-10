@@ -9,7 +9,7 @@ public class ChangeStanceDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0x6E2A, new ChangeStanceDecoder().Op);
+        Assert.Equal((uint)0x00006E2A, new ChangeStanceDecoder().Op);
     }
 
     [Fact]
@@ -21,7 +21,7 @@ public class ChangeStanceDecoderTests
             MessageElem.Byte(1),
             MessageElem.Byte(1),
         };
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x6E2A, 4504699144649501UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00006E2A, 4504699144649501UL, elems);
         var result = Assert.IsType<ChangeStance>(new ChangeStanceDecoder().Decode(input));
         Assert.Equal((byte)1, result.Stance);
     }

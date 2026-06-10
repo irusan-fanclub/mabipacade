@@ -19,7 +19,7 @@ public static class EnvelopeShape
         w.WriteString("kind", "packet");
         w.WriteString("ts", p.TimestampUtc.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
         w.WriteString("dir", p.Direction == Direction.Inbound ? "in" : "out");
-        w.WriteString("op", $"0x{p.Op:X4}");
+        w.WriteString("op", $"0x{p.Op:X8}");
 
         var name = opNameLookup?.Invoke(p.Op);
         if (name is null) w.WriteNull("opName"); else w.WriteString("opName", name);
@@ -78,11 +78,11 @@ public static class EnvelopeShape
                 w.WriteString("reason", s.Reason);
                 break;
             case SessionEvent.BadBody s:
-                w.WriteString("op", $"0x{s.Op:X4}");
+                w.WriteString("op", $"0x{s.Op:X8}");
                 w.WriteNumber("length", s.Length);
                 break;
             case SessionEvent.DecoderFailed s:
-                w.WriteString("op", $"0x{s.Op:X4}");
+                w.WriteString("op", $"0x{s.Op:X8}");
                 w.WriteString("exceptionMessage", s.ExceptionMessage);
                 break;
         }

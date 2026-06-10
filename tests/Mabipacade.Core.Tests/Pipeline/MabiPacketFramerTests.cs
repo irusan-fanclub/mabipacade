@@ -8,12 +8,12 @@ public class MabiPacketFramerTests
     [Fact]
     public void Ok_ParsesSingleMinimalPacket()
     {
-        var bytes = TestPacketBuilder.BuildNormal(op: 0x6984, entityId: 0x12345678AABBCCDDUL,
+        var bytes = TestPacketBuilder.BuildNormal(op: 0x00006984, entityId: 0x12345678AABBCCDDUL,
                                                   bodyTail: new byte[] { 0x00 });
         var result = MabiPacketFramer.TryReadOne(bytes, out var slice, out int consumed);
         Assert.Equal(FrameResult.Ok, result);
         Assert.NotNull(slice);
-        Assert.Equal((uint)0x6984, slice!.Op);
+        Assert.Equal((uint)0x00006984, slice!.Op);
         Assert.Equal(0x12345678AABBCCDDUL, slice.EntityId);
         Assert.Equal(bytes.Length, consumed);
     }
@@ -29,7 +29,7 @@ public class MabiPacketFramerTests
         var result = MabiPacketFramer.TryReadOne(bytes, out var slice, out _);
         Assert.Equal(FrameResult.Ok, result);
         Assert.Equal(0x00021208u, slice!.Op);
-        Assert.NotEqual(0x1208u, slice.Op);
+        Assert.NotEqual(0x00001208u, slice.Op);
     }
 
     [Fact]
@@ -45,7 +45,7 @@ public class MabiPacketFramerTests
     [Fact]
     public void NeedMore_WhenLengthExceedsBuffer()
     {
-        var bytes = TestPacketBuilder.BuildNormal(op: 0x6984, entityId: 0UL,
+        var bytes = TestPacketBuilder.BuildNormal(op: 0x00006984, entityId: 0UL,
                                                   bodyTail: new byte[80]);
         var truncated = bytes[..(bytes.Length / 2)];
         var result = MabiPacketFramer.TryReadOne(truncated, out _, out int consumed);
@@ -78,16 +78,16 @@ public class MabiPacketFramerTests
     [Fact]
     public void Ok_ConsumesExactly_LeavesTrailing()
     {
-        var p1 = TestPacketBuilder.BuildNormal(op: 0x6984, entityId: 0UL, bodyTail: new byte[] { 0x00 });
-        var p2 = TestPacketBuilder.BuildNormal(op: 0x6985, entityId: 1UL, bodyTail: new byte[] { 0x00, 0x00, 0x00 });
+        var p1 = TestPacketBuilder.BuildNormal(op: 0x00006984, entityId: 0UL, bodyTail: new byte[] { 0x00 });
+        var p2 = TestPacketBuilder.BuildNormal(op: 0x00006985, entityId: 1UL, bodyTail: new byte[] { 0x00, 0x00, 0x00 });
         var combined = p1.Concat(p2).ToArray();
 
         Assert.Equal(FrameResult.Ok, MabiPacketFramer.TryReadOne(combined, out var first, out int c1));
-        Assert.Equal((uint)0x6984, first!.Op);
+        Assert.Equal((uint)0x00006984, first!.Op);
         Assert.Equal(p1.Length, c1);
 
         Assert.Equal(FrameResult.Ok, MabiPacketFramer.TryReadOne(combined.AsSpan(c1), out var second, out int c2));
-        Assert.Equal((uint)0x6985, second!.Op);
+        Assert.Equal((uint)0x00006985, second!.Op);
         Assert.Equal(p2.Length, c2);
     }
 }

@@ -7,7 +7,7 @@ public sealed record CombatActionEnd(uint ActionId);
 
 public sealed class CombatActionEndDecoder : IPacketDecoder
 {
-    public uint Op => 0x7925;
+    public uint Op => 0x00007925;
 
     public object Decode(DecoderInput input)
     {

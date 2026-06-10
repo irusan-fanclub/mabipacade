@@ -9,7 +9,7 @@ public sealed record PetSystemField(byte Flag1, byte Flag2);
 
 public sealed class PetSystemFieldDecoder : IPacketDecoder
 {
-    public uint Op => 0x909A;
+    public uint Op => 0x0000909A;
 
     public object Decode(DecoderInput input)
     {

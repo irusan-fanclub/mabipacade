@@ -23,7 +23,7 @@ public class NdjsonContractTests
     {
         var output = RenderPackets(new MabiPacket(
             new DateTime(2026, 5, 13, 8, 0, 0, DateTimeKind.Utc),
-            Direction.Inbound, 0x6984, 12345UL,
+            Direction.Inbound, 0x00006984, 12345UL,
             new[] { MessageElem.Short(59000) }, null));
         var line = output.TrimEnd();
         var doc = JsonDocument.Parse(line);
@@ -34,7 +34,7 @@ public class NdjsonContractTests
 
         Assert.Equal("packet", root.GetProperty("kind").GetString());
         Assert.Equal("in", root.GetProperty("dir").GetString());
-        Assert.Equal("0x6984", root.GetProperty("op").GetString());
+        Assert.Equal("0x00006984", root.GetProperty("op").GetString());
         Assert.Equal("12345", root.GetProperty("entityId").GetString());
     }
 
@@ -62,7 +62,7 @@ public class NdjsonContractTests
     public void Elem_UsesTV_Compact()
     {
         var output = RenderPackets(new MabiPacket(
-            DateTime.UtcNow, Direction.Inbound, 0x6984, 0UL,
+            DateTime.UtcNow, Direction.Inbound, 0x00006984, 0UL,
             new[] { MessageElem.Short(42) }, null));
         var doc = JsonDocument.Parse(output.TrimEnd());
         var elem = doc.RootElement.GetProperty("elems")[0];
@@ -74,7 +74,7 @@ public class NdjsonContractTests
     public void UnknownOp_OpNameIsNull_NotMissing()
     {
         var output = RenderPackets(new MabiPacket(
-            DateTime.UtcNow, Direction.Inbound, 0xFFFF, 0UL,
+            DateTime.UtcNow, Direction.Inbound, 0x0000FFFF, 0UL,
             Array.Empty<MessageElem>(), null));
         var doc = JsonDocument.Parse(output.TrimEnd());
         Assert.Equal(JsonValueKind.Null, doc.RootElement.GetProperty("opName").ValueKind);

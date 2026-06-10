@@ -7,7 +7,7 @@ public sealed record SummonPetR(byte Active, ulong PetId);
 
 public sealed class SummonPetRDecoder : IPacketDecoder
 {
-    public uint Op => 0x902D;
+    public uint Op => 0x0000902D;
 
     public object Decode(DecoderInput input)
     {

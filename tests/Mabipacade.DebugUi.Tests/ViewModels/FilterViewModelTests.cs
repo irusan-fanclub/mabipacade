@@ -5,7 +5,7 @@ namespace Mabipacade.DebugUi.Tests.ViewModels;
 
 public class FilterViewModelTests
 {
-    private static MabiPacket Make(uint op = 0x6984, ulong entityId = 0UL, object? decoded = null)
+    private static MabiPacket Make(uint op = 0x00006984, ulong entityId = 0UL, object? decoded = null)
         => new(DateTime.UtcNow, Direction.Inbound, op, entityId, Array.Empty<MessageElem>(), decoded);
 
     [Fact]
@@ -13,16 +13,16 @@ public class FilterViewModelTests
     {
         var vm = new FilterViewModel();
         Assert.True(vm.IsAllowed(Make()));
-        Assert.True(vm.IsAllowed(Make(op: 0xFFFF)));
+        Assert.True(vm.IsAllowed(Make(op: 0x0000FFFF)));
     }
 
     [Fact]
     public void OpText_LimitsToList()
     {
-        var vm = new FilterViewModel { OpText = "0x6984,0x7926" };
-        Assert.True(vm.IsAllowed(Make(op: 0x6984)));
-        Assert.True(vm.IsAllowed(Make(op: 0x7926)));
-        Assert.False(vm.IsAllowed(Make(op: 0x6985)));
+        var vm = new FilterViewModel { OpText = "0x00006984,0x00007926" };
+        Assert.True(vm.IsAllowed(Make(op: 0x00006984)));
+        Assert.True(vm.IsAllowed(Make(op: 0x00007926)));
+        Assert.False(vm.IsAllowed(Make(op: 0x00006985)));
     }
 
     [Fact]

@@ -7,7 +7,7 @@ public sealed record SetFinisher(ulong TargetId);
 
 public sealed class SetFinisherDecoder : IPacketDecoder
 {
-    public uint Op => 0x7921;
+    public uint Op => 0x00007921;
 
     public object Decode(DecoderInput input)
     {

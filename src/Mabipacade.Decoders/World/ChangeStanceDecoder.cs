@@ -7,7 +7,7 @@ public sealed record ChangeStance(byte Stance);
 
 public sealed class ChangeStanceDecoder : IPacketDecoder
 {
-    public uint Op => 0x6E2A;
+    public uint Op => 0x00006E2A;
 
     public object Decode(DecoderInput input)
     {

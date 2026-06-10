@@ -7,7 +7,7 @@ public sealed record PetSyncAck;
 
 public sealed class PetSyncAckDecoder : IPacketDecoder
 {
-    public uint Op => 0xAF10;
+    public uint Op => 0x0000AF10;
 
     public object Decode(DecoderInput input) => new PetSyncAck();
 }

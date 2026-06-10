@@ -40,7 +40,7 @@ public sealed record PetMovementSync(uint Action, uint Region, float X, float Y)
 
 public sealed class PetMovementSyncDecoder : IPacketDecoder
 {
-    public uint Op => 0x9093;
+    public uint Op => 0x00009093;
     public object Decode(DecoderInput input)
     {
         var e = input.Elems;

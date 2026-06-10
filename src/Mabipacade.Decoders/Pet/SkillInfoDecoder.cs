@@ -7,7 +7,7 @@ public sealed record SkillInfo(ushort SkillId, byte[] Info);
 
 public sealed class SkillInfoDecoder : IPacketDecoder
 {
-    public uint Op => 0x6979;
+    public uint Op => 0x00006979;
 
     public object Decode(DecoderInput input)
     {

@@ -8,7 +8,7 @@ public sealed record EquipUnk59E1(ulong InstanceId, uint Value);
 
 public sealed class EquipUnk59E1Decoder : IPacketDecoder
 {
-    public uint Op => 0x59E1;
+    public uint Op => 0x000059E1;
 
     public object Decode(DecoderInput input)
     {

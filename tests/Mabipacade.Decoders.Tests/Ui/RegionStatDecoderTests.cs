@@ -9,13 +9,13 @@ public class RegionStatDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0xA93B, new RegionStatDecoder().Op);
+        Assert.Equal((uint)0x0000A93B, new RegionStatDecoder().Op);
     }
 
     [Fact]
     public void Decodes_Sample()
     {
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0xA93B, 0UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x0000A93B, 0UL,
             new[]
             {
                 MessageElem.Int(35004),

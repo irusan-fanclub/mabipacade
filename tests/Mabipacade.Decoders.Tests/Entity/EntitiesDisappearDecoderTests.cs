@@ -9,13 +9,13 @@ public class EntitiesDisappearDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0x5335, new EntitiesDisappearDecoder().Op);
+        Assert.Equal((uint)0x00005335, new EntitiesDisappearDecoder().Op);
     }
 
     [Fact]
     public void Decodes_ReturnsCorrectType()
     {
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x5335, 0UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00005335, 0UL,
             Array.Empty<MessageElem>());
         Assert.IsType<EntitiesDisappear>(new EntitiesDisappearDecoder().Decode(input));
     }

@@ -9,7 +9,7 @@ public class CharacterLockDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0x701E, new CharacterLockDecoder().Op);
+        Assert.Equal((uint)0x0000701E, new CharacterLockDecoder().Op);
     }
 
     [Fact]
@@ -21,7 +21,7 @@ public class CharacterLockDecoderTests
             MessageElem.Int(0xEFFFFFFE),
             MessageElem.Int(0),
         };
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x701E, 0UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x0000701E, 0UL, elems);
         var result = Assert.IsType<CharacterLock>(new CharacterLockDecoder().Decode(input));
         Assert.Equal(0xEFFFFFFEu, result.Marker);
     }

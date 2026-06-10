@@ -9,7 +9,7 @@ public class PetRegisterDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0x9024, new PetRegisterDecoder().Op);
+        Assert.Equal((uint)0x00009024, new PetRegisterDecoder().Op);
     }
 
     [Fact]
@@ -20,7 +20,7 @@ public class PetRegisterDecoderTests
             MessageElem.Long(4504699139850743UL),
             MessageElem.Byte(2),
         };
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x9024, 4503599628180874UL, elems);
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x00009024, 4503599628180874UL, elems);
         var result = Assert.IsType<PetRegister>(new PetRegisterDecoder().Decode(input));
         Assert.Equal(4504699139850743UL, result.PetId);
         Assert.Equal((byte)2, result.Flag);

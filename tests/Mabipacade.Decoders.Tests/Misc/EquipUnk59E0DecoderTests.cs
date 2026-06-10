@@ -7,12 +7,12 @@ namespace Mabipacade.Decoders.Tests.Misc;
 public class EquipUnk59E0DecoderTests
 {
     [Fact]
-    public void Op_Matches() => Assert.Equal((uint)0x59E0, new EquipUnk59E0Decoder().Op);
+    public void Op_Matches() => Assert.Equal((uint)0x000059E0, new EquipUnk59E0Decoder().Op);
 
     [Fact]
     public void Decodes_Sample()
     {
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x59E0, 0UL,
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x000059E0, 0UL,
             new List<MessageElem>
             {
                 MessageElem.Long(22518903766512199UL),

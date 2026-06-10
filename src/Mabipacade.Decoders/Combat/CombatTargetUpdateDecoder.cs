@@ -7,7 +7,7 @@ public sealed record CombatTargetUpdate(ulong TargetId);
 
 public sealed class CombatTargetUpdateDecoder : IPacketDecoder
 {
-    public uint Op => 0x791A;
+    public uint Op => 0x0000791A;
 
     public object Decode(DecoderInput input)
     {
