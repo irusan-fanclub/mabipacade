@@ -21,4 +21,13 @@ public class CombatActionEndDecoderTests
     {
         Assert.Equal((uint)0x7925, new CombatActionEndDecoder().Op);
     }
+
+    [Fact]
+    public void Decodes_ActionId()
+    {
+        var elems = new List<MessageElem> { MessageElem.Int(2930627) };
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x7925, 0UL, elems);
+        var r = (CombatActionEnd)new CombatActionEndDecoder().Decode(input);
+        Assert.Equal(2930627U, r.ActionId);
+    }
 }
