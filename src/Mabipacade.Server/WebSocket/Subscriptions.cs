@@ -8,7 +8,7 @@ namespace Mabipacade.Server.WebSocket;
 internal sealed class Subscription
 {
     private HashSet<string>? _kinds;       // null = all kinds
-    private HashSet<ushort>? _ops;         // null = all ops
+    private HashSet<uint>? _ops;         // null = all ops
 
     public void ApplyCommand(string json)
     {
@@ -23,13 +23,13 @@ internal sealed class Subscription
 
             if (root.TryGetProperty("ops", out var opsElem) && opsElem.ValueKind == JsonValueKind.Array)
             {
-                var ops = new HashSet<ushort>();
+                var ops = new HashSet<uint>();
                 foreach (var item in opsElem.EnumerateArray())
                 {
                     var s = item.GetString();
                     if (s is null) continue;
                     var hex = s.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? s[2..] : s;
-                    if (ushort.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var op))
+                    if (uint.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var op))
                         ops.Add(op);
                 }
                 _ops = ops.Count == 0 ? null : ops;

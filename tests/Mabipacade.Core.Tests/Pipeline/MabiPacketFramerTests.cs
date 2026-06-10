@@ -13,9 +13,23 @@ public class MabiPacketFramerTests
         var result = MabiPacketFramer.TryReadOne(bytes, out var slice, out int consumed);
         Assert.Equal(FrameResult.Ok, result);
         Assert.NotNull(slice);
-        Assert.Equal((ushort)0x6984, slice!.Op);
+        Assert.Equal((uint)0x6984, slice!.Op);
         Assert.Equal(0x12345678AABBCCDDUL, slice.EntityId);
         Assert.Equal(bytes.Length, consumed);
+    }
+
+    [Fact]
+    public void Ok_PreservesFull32BitOpcode_NoTruncation()
+    {
+        // TW opcodes carry a category byte in the upper 16 bits (e.g. 0x00021208
+        // buff-state, 0x0001FBD4 pet). Narrowing to ushort would collide these
+        // with 0x1208 / 0xFBD4. The framer must keep all 32 bits.
+        var bytes = TestPacketBuilder.BuildNormal(op: 0x00021208, entityId: 0UL,
+                                                  bodyTail: new byte[] { 0x00 });
+        var result = MabiPacketFramer.TryReadOne(bytes, out var slice, out _);
+        Assert.Equal(FrameResult.Ok, result);
+        Assert.Equal(0x00021208u, slice!.Op);
+        Assert.NotEqual(0x1208u, slice.Op);
     }
 
     [Fact]
@@ -69,11 +83,11 @@ public class MabiPacketFramerTests
         var combined = p1.Concat(p2).ToArray();
 
         Assert.Equal(FrameResult.Ok, MabiPacketFramer.TryReadOne(combined, out var first, out int c1));
-        Assert.Equal((ushort)0x6984, first!.Op);
+        Assert.Equal((uint)0x6984, first!.Op);
         Assert.Equal(p1.Length, c1);
 
         Assert.Equal(FrameResult.Ok, MabiPacketFramer.TryReadOne(combined.AsSpan(c1), out var second, out int c2));
-        Assert.Equal((ushort)0x6985, second!.Op);
+        Assert.Equal((uint)0x6985, second!.Op);
         Assert.Equal(p2.Length, c2);
     }
 }

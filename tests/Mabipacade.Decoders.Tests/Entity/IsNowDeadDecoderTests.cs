@@ -9,7 +9,7 @@ public class IsNowDeadDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((ushort)0x53FC, new IsNowDeadDecoder().Op);
+        Assert.Equal((uint)0x53FC, new IsNowDeadDecoder().Op);
     }
 
     [Fact]

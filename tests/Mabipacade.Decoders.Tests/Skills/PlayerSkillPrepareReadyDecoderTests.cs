@@ -19,6 +19,6 @@ public class PlayerSkillPrepareReadyDecoderTests
     [Fact]
     public void Op_Is6985()
     {
-        Assert.Equal((ushort)0x6985, new PlayerSkillPrepareReadyDecoder().Op);
+        Assert.Equal((uint)0x6985, new PlayerSkillPrepareReadyDecoder().Op);
     }
 }

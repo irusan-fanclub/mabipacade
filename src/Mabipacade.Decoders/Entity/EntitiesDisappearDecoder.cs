@@ -6,6 +6,6 @@ public sealed record EntitiesDisappear;
 
 public sealed class EntitiesDisappearDecoder : IPacketDecoder
 {
-    public ushort Op => 0x5335;
+    public uint Op => 0x5335;
     public object Decode(DecoderInput input) => new EntitiesDisappear();
 }

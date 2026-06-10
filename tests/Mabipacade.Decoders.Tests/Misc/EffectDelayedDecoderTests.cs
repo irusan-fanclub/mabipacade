@@ -9,7 +9,7 @@ public class EffectDelayedDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((ushort)0x9095, new EffectDelayedDecoder().Op);
+        Assert.Equal((uint)0x9095, new EffectDelayedDecoder().Op);
     }
 
     [Fact]

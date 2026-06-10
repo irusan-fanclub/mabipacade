@@ -13,7 +13,7 @@ public class MabiPacketTests
 
         Assert.Equal(ts, packet.TimestampUtc);
         Assert.Equal(Direction.Inbound, packet.Direction);
-        Assert.Equal((ushort)0x6984, packet.Op);
+        Assert.Equal((uint)0x6984, packet.Op);
         Assert.Equal(12345UL, packet.EntityId);
         Assert.Single(packet.Elems);
         Assert.Null(packet.Decoded);

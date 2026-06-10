@@ -9,7 +9,7 @@ public class ChatDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((ushort)0x526C, new ChatDecoder().Op);
+        Assert.Equal((uint)0x526C, new ChatDecoder().Op);
     }
 
     [Fact]

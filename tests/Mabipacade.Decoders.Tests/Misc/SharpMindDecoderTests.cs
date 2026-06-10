@@ -9,7 +9,7 @@ public class SharpMindDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((ushort)0xA41E, new SharpMindDecoder().Op);
+        Assert.Equal((uint)0xA41E, new SharpMindDecoder().Op);
     }
 
     [Fact]

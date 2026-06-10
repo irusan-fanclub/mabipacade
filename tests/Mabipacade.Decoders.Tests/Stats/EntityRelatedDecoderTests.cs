@@ -9,7 +9,7 @@ public class EntityRelatedDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((ushort)0x7534, new EntityRelatedDecoder().Op);
+        Assert.Equal((uint)0x7534, new EntityRelatedDecoder().Op);
     }
 
     [Fact]

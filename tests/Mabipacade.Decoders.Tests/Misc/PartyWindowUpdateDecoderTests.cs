@@ -9,7 +9,7 @@ public class PartyWindowUpdateDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((ushort)0xA43C, new PartyWindowUpdateDecoder().Op);
+        Assert.Equal((uint)0xA43C, new PartyWindowUpdateDecoder().Op);
     }
 
     [Fact]

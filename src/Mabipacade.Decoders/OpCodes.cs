@@ -1,6 +1,6 @@
 namespace Mabipacade.Decoders;
 
-public enum OpCodes : ushort
+public enum OpCodes : uint
 {
     CombatAction          = 0x7924,
     CombatActionEnd       = 0x7925,

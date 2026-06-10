@@ -15,6 +15,11 @@
                 <Button Content="Stop"       Command="{Binding StopCommand}" Margin="4,0"/>
                 <Separator/>
                 <Button Content="Clear" Command="{Binding ClearCommand}" Margin="4,0"/>
+                <Separator/>
+                <Button Content="Start Log" Command="{Binding StartLogCommand}" Margin="4,0"/>
+                <Button Content="Stop Log"  Command="{Binding StopLogCommand}"  Margin="4,0"/>
+                <Button Content="Save As…"  Click="OnSaveLogAs"                 Margin="4,0"/>
+                <Button Content="Open Logs" Click="OnOpenLogsFolder"            Margin="4,0"/>
             </ToolBar>
         </ToolBarTray>
 
@@ -39,6 +44,8 @@
             <StatusBarItem Content="{Binding Status.BytesPerSec, StringFormat={}{0} B/s}"/>
             <Separator/>
             <StatusBarItem Content="{Binding Status.BadBodyCount, StringFormat=BadBody: {0}}"/>
+            <Separator/>
+            <StatusBarItem Content="{Binding LoggerLabel}"/>
         </StatusBar>
 
         <Border DockPanel.Dock="Top" BorderBrush="LightGray" BorderThickness="0,0,0,1" Padding="6"

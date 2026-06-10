@@ -8,7 +8,7 @@ public sealed class FilterViewModel : ObservableObject
     private string _opText = string.Empty;
     private string _entityIdText = string.Empty;
     private bool _decodedOnly;
-    private HashSet<ushort>? _opSet;
+    private HashSet<uint>? _opSet;
 
     public string OpText
     {
@@ -39,13 +39,13 @@ public sealed class FilterViewModel : ObservableObject
     private void RebuildOpSet()
     {
         if (string.IsNullOrWhiteSpace(_opText)) { _opSet = null; return; }
-        var set = new HashSet<ushort>();
+        var set = new HashSet<uint>();
         foreach (var raw in _opText.Split(','))
         {
             var t = raw.Trim();
             if (t.Length == 0) continue;
             if (!t.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) { _opSet = null; return; }
-            if (!ushort.TryParse(t[2..], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var op))
+            if (!uint.TryParse(t[2..], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var op))
             { _opSet = null; return; }
             set.Add(op);
         }

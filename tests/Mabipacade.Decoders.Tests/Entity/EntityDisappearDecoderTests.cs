@@ -9,7 +9,7 @@ public class EntityDisappearDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((ushort)0x520D, new EntityDisappearDecoder().Op);
+        Assert.Equal((uint)0x520D, new EntityDisappearDecoder().Op);
     }
 
     [Fact]

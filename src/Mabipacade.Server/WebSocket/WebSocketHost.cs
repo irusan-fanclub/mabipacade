@@ -13,9 +13,9 @@ internal sealed class WebSocketHost : IDisposable
 {
     private readonly WebSocketServer _server;
     private readonly ConcurrentDictionary<IWebSocketConnection, Subscription> _clients = new();
-    private readonly Func<ushort, string?> _opNameLookup;
+    private readonly Func<uint, string?> _opNameLookup;
 
-    public WebSocketHost(int port, Func<ushort, string?> opNameLookup)
+    public WebSocketHost(int port, Func<uint, string?> opNameLookup)
     {
         _opNameLookup = opNameLookup;
         FleckLog.Level = LogLevel.Warn;

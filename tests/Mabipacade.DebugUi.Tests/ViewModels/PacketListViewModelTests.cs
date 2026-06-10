@@ -5,7 +5,7 @@ namespace Mabipacade.DebugUi.Tests.ViewModels;
 
 public class PacketListViewModelTests
 {
-    private static MabiPacket Make(ushort op = 0x6984) =>
+    private static MabiPacket Make(uint op = 0x6984) =>
         new(DateTime.UtcNow, Direction.Inbound, op, 0UL, Array.Empty<MessageElem>(), null);
 
     [Fact]

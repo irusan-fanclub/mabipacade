@@ -16,8 +16,8 @@ public abstract record SessionEvent(DateTime TimestampUtc)
         : SessionEvent(TimestampUtc);
     public sealed record FrameResync(DateTime TimestampUtc, long ByteOffset, string Reason)
         : SessionEvent(TimestampUtc);
-    public sealed record BadBody(DateTime TimestampUtc, ushort Op, int Length)
+    public sealed record BadBody(DateTime TimestampUtc, uint Op, int Length)
         : SessionEvent(TimestampUtc);
-    public sealed record DecoderFailed(DateTime TimestampUtc, ushort Op, string ExceptionMessage)
+    public sealed record DecoderFailed(DateTime TimestampUtc, uint Op, string ExceptionMessage)
         : SessionEvent(TimestampUtc);
 }

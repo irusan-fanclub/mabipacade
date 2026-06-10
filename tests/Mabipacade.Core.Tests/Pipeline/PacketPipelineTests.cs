@@ -24,7 +24,7 @@ public class PacketPipelineTests
         await pipeline.StopAsync();
 
         Assert.Single(packets);
-        Assert.Equal((ushort)0x6984, packets[0].Op);
+        Assert.Equal((uint)0x6984, packets[0].Op);
     }
 
     [Fact]

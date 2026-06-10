@@ -56,4 +56,45 @@ public partial class MainWindow : Window
     {
         _vm.Source.Mode = SourceMode.Live;
     }
+
+    private void OnSaveLogAs(object sender, RoutedEventArgs e)
+    {
+        if (_vm.CurrentLogPath is null)
+        {
+            MessageBox.Show(this, "No log to save. Start logging first.", "Save Log As",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        var dlg = new SaveFileDialog
+        {
+            Filter = "JSON Lines (*.jsonl)|*.jsonl|All files (*.*)|*.*",
+            FileName = Path.GetFileName(_vm.CurrentLogPath),
+            InitialDirectory = Path.GetDirectoryName(_vm.CurrentLogPath),
+        };
+        if (dlg.ShowDialog() != true) return;
+        try { _vm.SaveLogAs(dlg.FileName); }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Save Log As",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void OnOpenLogsFolder(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Directory.CreateDirectory(_vm.LogsDirectory);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = _vm.LogsDirectory,
+                UseShellExecute = true,
+            });
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, ex.Message, "Open Logs",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
 }

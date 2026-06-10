@@ -9,7 +9,7 @@ public class ConditionUpdate2DecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((ushort)0xA028, new ConditionUpdate2Decoder().Op);
+        Assert.Equal((uint)0xA028, new ConditionUpdate2Decoder().Op);
     }
 
     [Fact]

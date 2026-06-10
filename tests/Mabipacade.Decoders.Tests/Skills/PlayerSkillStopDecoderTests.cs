@@ -19,6 +19,6 @@ public class PlayerSkillStopDecoderTests
     [Fact]
     public void Op_Is698B()
     {
-        Assert.Equal((ushort)0x698B, new PlayerSkillStopDecoder().Op);
+        Assert.Equal((uint)0x698B, new PlayerSkillStopDecoder().Op);
     }
 }

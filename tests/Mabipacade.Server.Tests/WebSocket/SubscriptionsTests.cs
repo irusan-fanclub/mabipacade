@@ -6,7 +6,7 @@ namespace Mabipacade.Server.Tests.WebSocket;
 
 public class SubscriptionsTests
 {
-    private static MabiPacket Make(ushort op) =>
+    private static MabiPacket Make(uint op) =>
         new(DateTime.UtcNow, Direction.Inbound, op, 0UL, Array.Empty<MessageElem>(), null);
 
     [Fact]

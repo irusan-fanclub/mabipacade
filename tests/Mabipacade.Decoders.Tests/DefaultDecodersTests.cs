@@ -18,8 +18,8 @@ public class DefaultDecodersTests
     {
         var reg = new DecoderRegistry();
         DefaultDecoders.RegisterAll(reg);
-        Assert.Contains((ushort)0x6984, reg.RegisteredOps);
-        Assert.Contains((ushort)0x7926, reg.RegisteredOps);
-        Assert.Contains((ushort)0x520C, reg.RegisteredOps);
+        Assert.Contains((uint)0x6984, reg.RegisteredOps);
+        Assert.Contains((uint)0x7926, reg.RegisteredOps);
+        Assert.Contains((uint)0x520C, reg.RegisteredOps);
     }
 }

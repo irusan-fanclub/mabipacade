@@ -13,7 +13,7 @@ public static class EnvelopeShape
         WriteIndented = false,
     };
 
-    public static void WritePacket(Utf8JsonWriter w, MabiPacket p, Func<ushort, string?>? opNameLookup = null)
+    public static void WritePacket(Utf8JsonWriter w, MabiPacket p, Func<uint, string?>? opNameLookup = null)
     {
         w.WriteStartObject();
         w.WriteString("kind", "packet");

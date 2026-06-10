@@ -5,7 +5,7 @@ namespace Mabipacade.DebugUi.Tests.ViewModels;
 
 public class FilterViewModelTests
 {
-    private static MabiPacket Make(ushort op = 0x6984, ulong entityId = 0UL, object? decoded = null)
+    private static MabiPacket Make(uint op = 0x6984, ulong entityId = 0UL, object? decoded = null)
         => new(DateTime.UtcNow, Direction.Inbound, op, entityId, Array.Empty<MessageElem>(), decoded);
 
     [Fact]

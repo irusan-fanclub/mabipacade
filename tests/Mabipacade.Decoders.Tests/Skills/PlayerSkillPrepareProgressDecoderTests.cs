@@ -19,6 +19,6 @@ public class PlayerSkillPrepareProgressDecoderTests
     [Fact]
     public void Op_Is6993()
     {
-        Assert.Equal((ushort)0x6993, new PlayerSkillPrepareProgressDecoder().Op);
+        Assert.Equal((uint)0x6993, new PlayerSkillPrepareProgressDecoder().Op);
     }
 }

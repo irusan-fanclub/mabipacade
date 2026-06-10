@@ -9,7 +9,7 @@ public class EffectDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((ushort)0x9091, new EffectDecoder().Op);
+        Assert.Equal((uint)0x9091, new EffectDecoder().Op);
     }
 
     [Fact]

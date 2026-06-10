@@ -9,7 +9,7 @@ public class EquipmentChangedDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((ushort)0x59E6, new EquipmentChangedDecoder().Op);
+        Assert.Equal((uint)0x59E6, new EquipmentChangedDecoder().Op);
     }
 
     [Fact]

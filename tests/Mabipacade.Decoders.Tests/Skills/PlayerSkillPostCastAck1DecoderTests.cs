@@ -19,6 +19,6 @@ public class PlayerSkillPostCastAck1DecoderTests
     [Fact]
     public void Op_Is6988()
     {
-        Assert.Equal((ushort)0x6988, new PlayerSkillPostCastAck1Decoder().Op);
+        Assert.Equal((uint)0x6988, new PlayerSkillPostCastAck1Decoder().Op);
     }
 }

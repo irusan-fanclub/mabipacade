@@ -5,6 +5,6 @@ namespace Mabipacade.Core.Plugins;
 public readonly record struct DecoderInput(
     DateTime TimestampUtc,
     Direction Direction,
-    ushort Op,
+    uint Op,
     ulong EntityId,
     IReadOnlyList<MessageElem> Elems);

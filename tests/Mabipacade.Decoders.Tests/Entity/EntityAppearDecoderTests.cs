@@ -9,7 +9,7 @@ public class EntityAppearDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((ushort)0x520C, new EntityAppearDecoder().Op);
+        Assert.Equal((uint)0x520C, new EntityAppearDecoder().Op);
     }
 
     [Fact]

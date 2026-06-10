@@ -7,7 +7,7 @@ public sealed record Chat(string Sender, string Message);
 
 public sealed class ChatDecoder : IPacketDecoder
 {
-    public ushort Op => 0x526C;
+    public uint Op => 0x526C;
     public object Decode(DecoderInput input)
     {
         // Body shape speculative: looks for [String, String] pattern; fallback

@@ -13,8 +13,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private LiveSession? _liveSession;
 
     private readonly Services.NameResolverService _nameResolver = new();
+    private readonly PacketLogger _logger = new();
+    private string _logsDirectory;
     private bool _isRunning;
     private string _activityState = "○ Stopped";
+    private string _loggerLabel = "log: off";
 
     private System.Timers.Timer? _statsTimer;
     private long _lastFrames;
@@ -51,10 +54,29 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ICommand StartLiveCommand { get; }
     public ICommand StopCommand { get; }
     public ICommand ClearCommand { get; }
+    public ICommand StartLogCommand { get; }
+    public ICommand StopLogCommand { get; }
+
+    public bool IsLogging => _logger.IsActive;
+    public string? CurrentLogPath => _logger.CurrentPath;
+    public string LoggerLabel
+    {
+        get => _loggerLabel;
+        private set => SetField(ref _loggerLabel, value);
+    }
+    public string LogsDirectory
+    {
+        get => _logsDirectory;
+        set => SetField(ref _logsDirectory, value);
+    }
 
     public MainViewModel(IUiDispatcher dispatcher)
+        : this(dispatcher, Path.Combine(AppContext.BaseDirectory, "logs")) { }
+
+    public MainViewModel(IUiDispatcher dispatcher, string logsDirectory)
     {
         _dispatcher = dispatcher;
+        _logsDirectory = logsDirectory;
         PacketList = new PacketListViewModel(Filter);
         _nameResolver.Changed += (_, _) =>
         {
@@ -70,6 +92,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             PacketList.Clear();
             Detail.SelectedRow = null;
         });
+        StartLogCommand = new RelayCommand(_ => StartLogging(), _ => !_logger.IsActive);
+        StopLogCommand = new RelayCommand(_ => StopLogging(), _ => _logger.IsActive);
+
+        _logger.StateChanged += (_, _) => _dispatcher.BeginInvoke(OnLoggerStateChanged);
 
         _statsTimer = new System.Timers.Timer(1000) { AutoReset = true };
         _statsTimer.Elapsed += OnStatsTick;
@@ -157,8 +183,37 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void Wire(PipelineHost host)
     {
-        host.PacketReceived += (_, p) => PacketList.AddPacket(p);
+        host.PacketReceived += (_, p) =>
+        {
+            PacketList.AddPacket(p);
+            if (_logger.IsActive) _logger.Append(p);
+        };
         host.SessionEventReceived += (_, e) => Status.HandleEvent(e);
+    }
+
+    public string StartLogging(string? path = null)
+    {
+        if (_logger.IsActive) return _logger.CurrentPath!;
+        var target = path ?? PacketLogger.BuildDefaultPath(_logsDirectory, DateTime.Now);
+        _logger.Start(target);
+        return target;
+    }
+
+    public void StopLogging() => _logger.Stop();
+
+    public void SaveLogAs(string targetPath) => _logger.CopyTo(targetPath);
+
+    private void OnLoggerStateChanged()
+    {
+        OnPropertyChanged(nameof(IsLogging));
+        OnPropertyChanged(nameof(CurrentLogPath));
+        (StartLogCommand as RelayCommand)?.RaiseCanExecuteChanged();
+        (StopLogCommand as RelayCommand)?.RaiseCanExecuteChanged();
+        LoggerLabel = _logger.IsActive
+            ? $"log: {Path.GetFileName(_logger.CurrentPath)}"
+            : _logger.CurrentPath is { } last
+                ? $"log: {Path.GetFileName(last)} (stopped)"
+                : "log: off";
     }
 
     public void LoadNamesFromSettings(Models.DebugUiSettings settings)
@@ -171,5 +226,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _statsTimer?.Stop();
         _statsTimer?.Dispose();
         StopActive();
+        _logger.Dispose();
     }
 }

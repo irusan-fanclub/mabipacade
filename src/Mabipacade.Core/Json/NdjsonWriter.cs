@@ -7,10 +7,10 @@ namespace Mabipacade.Core.Json;
 public sealed class NdjsonWriter
 {
     private readonly TextWriter _out;
-    private readonly Func<ushort, string?>? _opNameLookup;
+    private readonly Func<uint, string?>? _opNameLookup;
     private readonly object _lock = new();
 
-    public NdjsonWriter(TextWriter outWriter, Func<ushort, string?>? opNameLookup = null)
+    public NdjsonWriter(TextWriter outWriter, Func<uint, string?>? opNameLookup = null)
     {
         _out = outWriter;
         _opNameLookup = opNameLookup;

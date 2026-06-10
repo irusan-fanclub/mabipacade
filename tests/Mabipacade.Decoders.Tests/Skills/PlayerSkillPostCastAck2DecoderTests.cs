@@ -19,6 +19,6 @@ public class PlayerSkillPostCastAck2DecoderTests
     [Fact]
     public void Op_Is6989()
     {
-        Assert.Equal((ushort)0x6989, new PlayerSkillPostCastAck2Decoder().Op);
+        Assert.Equal((uint)0x6989, new PlayerSkillPostCastAck2Decoder().Op);
     }
 }

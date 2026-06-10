@@ -6,7 +6,7 @@ public sealed record EntityAppear(uint RaceId, string Name);
 
 public sealed class EntityAppearDecoder : IPacketDecoder
 {
-    public ushort Op => 0x520C;
+    public uint Op => 0x520C;
     public object Decode(DecoderInput input)
     {
         // Body shape requires the reference impl's parser; M1 emits a

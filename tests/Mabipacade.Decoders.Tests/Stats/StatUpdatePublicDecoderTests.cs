@@ -9,7 +9,7 @@ public class StatUpdatePublicDecoderTests
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((ushort)0x7532, new StatUpdatePublicDecoder().Op);
+        Assert.Equal((uint)0x7532, new StatUpdatePublicDecoder().Op);
     }
 
     [Fact]

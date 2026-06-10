@@ -6,6 +6,6 @@ public sealed record SharpMind;
 
 public sealed class SharpMindDecoder : IPacketDecoder
 {
-    public ushort Op => 0xA41E;
+    public uint Op => 0xA41E;
     public object Decode(DecoderInput input) => new SharpMind();
 }

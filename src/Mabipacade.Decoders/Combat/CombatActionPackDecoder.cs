@@ -8,7 +8,7 @@ public sealed record CombatActionPack(ulong AttackerId, IReadOnlyList<CombatSubA
 
 public sealed class CombatActionPackDecoder : IPacketDecoder
 {
-    public ushort Op => 0x7926;
+    public uint Op => 0x7926;
     public object Decode(DecoderInput input)
     {
         // Body shape is complex (sub-packets within Bin elems). M1 emits an

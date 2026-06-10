@@ -19,6 +19,6 @@ public class CombatActionEndDecoderTests
     [Fact]
     public void Op_Is7925()
     {
-        Assert.Equal((ushort)0x7925, new CombatActionEndDecoder().Op);
+        Assert.Equal((uint)0x7925, new CombatActionEndDecoder().Op);
     }
 }

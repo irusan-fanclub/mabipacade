@@ -30,6 +30,6 @@ public class CombatActionPackDecoderTests
     [Fact]
     public void Op_Is7926()
     {
-        Assert.Equal((ushort)0x7926, new CombatActionPackDecoder().Op);
+        Assert.Equal((uint)0x7926, new CombatActionPackDecoder().Op);
     }
 }
