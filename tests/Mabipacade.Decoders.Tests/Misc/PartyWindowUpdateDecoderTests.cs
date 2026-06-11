@@ -13,10 +13,14 @@ public class PartyWindowUpdateDecoderTests
     }
 
     [Fact]
-    public void Decodes_ReturnsCorrectType()
+    public void Decodes_EntityIdFromHeader_AndBodyValues()
     {
-        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x0000A43C, 0UL,
-            Array.Empty<MessageElem>());
-        Assert.IsType<PartyWindowUpdate>(new PartyWindowUpdateDecoder().Decode(input));
+        var elems = new List<MessageElem> { MessageElem.Short(0), MessageElem.Int(0) };
+        var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x0000A43C,
+            4504699143795610UL, elems);
+        var r = (PartyWindowUpdate)new PartyWindowUpdateDecoder().Decode(input);
+        Assert.Equal(4504699143795610UL, r.EntityId);
+        Assert.Equal((ushort)0, r.Value1);
+        Assert.Equal(0u, r.Value2);
     }
 }
