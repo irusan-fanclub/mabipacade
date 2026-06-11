@@ -6,6 +6,7 @@ using Mabipacade.Decoders.Movement;
 using Mabipacade.Decoders.Pet;
 using Mabipacade.Decoders.Prop;
 using Mabipacade.Decoders.Skills;
+using Mabipacade.Decoders.Snapshot;
 using Mabipacade.Decoders.Stats;
 using Mabipacade.Decoders.Ui;
 using Mabipacade.Decoders.World;
@@ -44,6 +45,7 @@ public static class DefaultDecoders
         registry.Register(new EntitiesAppearDecoder());
         registry.Register(new EntitiesDisappearDecoder());
         registry.Register(new IsNowDeadDecoder());
+        registry.Register(new ChannelCharacterInfoDecoder());
 
         // Stats / body
         registry.Register(new StatUpdatePrivateDecoder());
