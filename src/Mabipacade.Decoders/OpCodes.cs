@@ -19,11 +19,12 @@ public enum OpCodes : uint
     StatUpdatePrivate   = 0x00007530,
     StatUpdatePublic    = 0x00007532,
     EntityRelated       = 0x00007534,
-    ConditionUpdate2    = 0x0000A028,
+    CharacterConditionUpdate = 0x0000A028,
     Chat                = 0x0000526C,
     Effect              = 0x00009091,
     EffectDelayed       = 0x00009095,
     SharpMind           = 0x0000A41E,
     PartyWindowUpdate   = 0x0000A43C,
-    EquipmentChanged    = 0x000059E6
+    EquipmentChanged    = 0x000059E6,
+    MissionRoomActors   = 0x000186A6
 }

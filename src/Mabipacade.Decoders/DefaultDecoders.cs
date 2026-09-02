@@ -53,7 +53,7 @@ public static class DefaultDecoders
         registry.Register(new StatUpdateUnk7533Decoder());
         registry.Register(new EntityRelatedDecoder());
         registry.Register(new CreatureBodyUpdateDecoder());
-        registry.Register(new ConditionUpdate2Decoder());
+        registry.Register(new CharacterConditionUpdateDecoder());
 
         // Items / equipment
         registry.Register(new EquipmentChangedDecoder());
@@ -113,6 +113,7 @@ public static class DefaultDecoders
         registry.Register(new EnterRegionRequestRDecoder());
         registry.Register(new EnterDynamicRegionDecoder());
         registry.Register(new RemoveDynamicRegionDecoder());
+        registry.Register(new MissionRoomActorsDecoder());
 
         // Prop
         registry.Register(new PropAppearsDecoder());

@@ -4,12 +4,12 @@ using Mabipacade.Decoders.Stats;
 
 namespace Mabipacade.Decoders.Tests.Stats;
 
-public class ConditionUpdate2DecoderTests
+public class CharacterConditionUpdateDecoderTests
 {
     [Fact]
     public void Op_Matches()
     {
-        Assert.Equal((uint)0x0000A028, new ConditionUpdate2Decoder().Op);
+        Assert.Equal((uint)0x0000A028, new CharacterConditionUpdateDecoder().Op);
     }
 
     [Fact]
@@ -17,6 +17,6 @@ public class ConditionUpdate2DecoderTests
     {
         var input = new DecoderInput(DateTime.UtcNow, Direction.Inbound, 0x0000A028, 0UL,
             Array.Empty<MessageElem>());
-        Assert.IsType<ConditionUpdate2>(new ConditionUpdate2Decoder().Decode(input));
+        Assert.IsType<CharacterConditionUpdate>(new CharacterConditionUpdateDecoder().Decode(input));
     }
 }

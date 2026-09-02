@@ -1,219 +1,154 @@
-using System.Buffers.Binary;
-using Mabipacade.Core.Model;
 using Mabipacade.Core.Plugins;
+using Mabipacade.Decoders.Snapshot.Sections;
 
 namespace Mabipacade.Decoders.Snapshot;
 
 /// <summary>
-/// Decoder for 0x5209 ChannelCharacterInfoRequestR, the owner-only full entity
-/// snapshot (600-700 elems). The fixed prefix (idx 0-60) is read by index; the
-/// dynamic sections (regens, inventory, skill book) are located structurally so
-/// the parser tolerates the version-sensitive tail. Everything is defensive —
-/// a malformed packet yields a partially-populated record, never an exception.
+/// Decoder for <c>0x5209 NET_CHARACTER_DATA_REPLY</c> 🅲 (MabiNotes/Aura call it
+/// ChannelCharacterInfoRequestR), the owner-only full character snapshot.
+///
+/// Layout follows the reference analysis in mabi_it_workspace
+/// <c>research/packet-0x5209/</c>, derived from Client.exe
+/// (TimeDateStamp 6A6861C9) for TW G28S1 and aligned against a 23,976-element
+/// capture.
+///
+/// The body carries no length prefixes: the client hands one message cursor
+/// down the component chain and each component returns it advanced. This parser
+/// mirrors that, so sections are read strictly in order and a section that
+/// fails to line up stops the parse rather than corrupting the rest.
 /// </summary>
 public sealed class ChannelCharacterInfoDecoder : IPacketDecoder
 {
     public uint Op => 0x00005209;
 
+    /// <summary><c>result == 1</c> is the only value carrying a body.</summary>
+    private const byte ResultSuccess = 1;
+
+    /// <summary>
+    /// How far past the last identified component to look for the quest log. The
+    /// unattributed span is 46 elements on the reference capture; the allowance
+    /// is generous enough for another character's components to differ while
+    /// still failing loudly rather than scanning the rest of the packet.
+    /// </summary>
+    private const int UnattributedSearchLimit = 512;
+
     public object Decode(DecoderInput input)
     {
-        var e = input.Elems;
+        var c = new ElemCursor(input.Elems);
+        var sections = new List<SnapshotSection>();
 
-        // --- Fixed prefix (TW layout, idx 0-60) ---------------------------
-        ulong entityId = Long(e, 1);
-        string name = Str(e, 3);
-        uint raceId = Int(e, 6);
-        float height = Flt(e, 12);
-        float weight = Flt(e, 13);
-        uint region = Int(e, 16);
-        uint posX = Int(e, 17);
-        uint posY = Int(e, 18);
-        byte dir = Byte(e, 19);
-        uint c1 = Int(e, 22) & 0xFFFFFF;
-        uint c2 = Int(e, 23) & 0xFFFFFF;
-        uint c3 = Int(e, 24) & 0xFFFFFF;
-        float cp = Flt(e, 25);
-
-        // Stats: Life, LifeInjured, LifeMaxBase, LifeMaxMod, Mana, ManaMaxBase,
-        // ManaMaxMod, Stamina, StaminaMaxBase, StaminaMaxMod, Hunger, sentinel.
-        float life = Flt(e, 32);
-        float lifeMax = Flt(e, 34) + Flt(e, 35);
-        float mana = Flt(e, 36);
-        float manaMax = Flt(e, 37) + Flt(e, 38);
-        float stamina = Flt(e, 39);
-        float staminaMax = Flt(e, 40) + Flt(e, 41);
-
-        ushort level = Short(e, 44);
-        uint totalLevelDiff = Int(e, 45);
-        ushort rebirth = Short(e, 47);
-
-        float str = Flt(e, 51);
-        float dex = Flt(e, 53);
-        float intel = Flt(e, 55);
-        float will = Flt(e, 57);
-        float luck = Flt(e, 59);
-
-        // --- Regen list (count at idx 207 of the fixed prefix) ------------
-        var regens = new List<SnapshotRegen>();
-        int idx = 208;
-        if (e.Count > 207 && e[207].Type == MessageElemType.Int)
+        // Header, read by CAccount::OnMessage (0x14243A100) before the cursor is
+        // handed to CCharacter::ProcessDataMessage.
+        byte result;
+        ulong characterId;
+        try
         {
-            uint regenCount = e[207].AsUInt32();
-            for (uint r = 0; r < regenCount && idx + 6 < e.Count; r++, idx += 7)
-            {
-                if (e[idx].Type != MessageElemType.Int) break;
-                regens.Add(new SnapshotRegen(
-                    Id: Int(e, idx),
-                    Change: Flt(e, idx + 1),
-                    TimeLeft: unchecked((int)Int(e, idx + 2)),
-                    Stat: Int(e, idx + 3),
-                    Max: Flt(e, idx + 5)));
-            }
+            result = c.U8();
+            characterId = c.U64();
+        }
+        catch (SnapshotFormatException ex)
+        {
+            return new CharacterSnapshot(0, 0, new SnapshotBody(), sections,
+                c.Index, input.Elems.Count, ex.Message);
         }
 
-        // --- Inventory: scan for the (W, H, N, Long) header ---------------
-        uint bagW = 0, bagH = 0;
-        var items = new List<SnapshotItem>();
-        int bagStart = FindBagHeader(e, idx);
-        int afterInventory = bagStart;
-        if (bagStart >= 0)
+        // 0x66 is a failure the client is told to ignore without complaint, so
+        // it is not reported as an error here either.
+        if (result != ResultSuccess)
+            return new CharacterSnapshot(result, characterId, new SnapshotBody(), sections,
+                c.Index, input.Elems.Count,
+                result == 0x66 ? null : $"result {result}");
+
+        var body = new SnapshotBody();
+        string? error = null;
+        try
         {
-            bagW = Int(e, bagStart);
-            bagH = Int(e, bagStart + 1);
-            uint n = Int(e, bagStart + 2);
-            int p = bagStart + 3;
-            for (uint i = 0; i < n && p + 6 < e.Count; i++)
+            // Order is CCharacter::ProcessDataMessage's component chain. Each
+            // reader leaves the cursor on the next component's first element.
+            body.Parameter = ReadSection(c, sections, "CParameter", CParameterSection.Read);
+            body.Titles = ReadSection(c, sections, "CTitleMgr", HeadSections.ReadTitleMgr);
+            body.Mate = ReadSection(c, sections, "CMateMgr", HeadSections.ReadMateMgr);
+            body.JobId = ReadSection(c, sections, "CJobComponent", HeadSections.ReadJob);
+            body.OptionWeapon = ReadSection(c, sections, "COptionWeaponComponent", HeadSections.ReadOptionWeapon);
+            body.Scmo = ReadSection(c, sections, "feature:0x659:SCMO", HeadSections.ReadScmo);
+            body.InventorySize = ReadSection(c, sections, "feature:0x1A4:InventorySize", HeadSections.ReadInventorySize);
+            body.Items = ReadSection(c, sections, "Items", ItemSection.Read);
+
+            body.Keywords = ReadSection(c, sections, "CKeyword", MidSections.ReadKeywords);
+            body.Skills = ReadSection(c, sections, "CSkillMgr", MidSections.ReadSkillMgr);
+            ReadSection(c, sections, "CBannerMgr", MidSections.ReadBanner);
+            ReadSection(c, sections, "CPVPMgr", MidSections.ReadPvp);
+            body.Conditions = ReadSection(c, sections, "CConditionMgr", MidSections.ReadConditions);
+            body.Guild = ReadSection(c, sections, "CGuildComponent", MidSections.ReadGuild);
+            ReadSection(c, sections, "CArbeitMgr", MidSections.ReadArbeit);
+            ReadSection(c, sections, "CSummonSlave", MidSections.ReadSummonSlave);
+            ReadSection(c, sections, "CSummonMaster", MidSections.ReadSummonMaster);
+            ReadSection(c, sections, "CTransformMgr", MidSections.ReadTransform);
+            body.Pet = ReadSection(c, sections, "CPetMgr", MidSections.ReadPet);
+            ReadSection(c, sections, "CHouseComponent", MidSections.ReadHouse);
+            ReadSection(c, sections, "CTameMgr", MidSections.ReadTame);
+            ReadSection(c, sections, "CVehicle", MidSections.ReadVehicle);
+            ReadSection(c, sections, "CShowdownComponent", MidSections.ReadShowdown);
+            ReadSection(c, sections, "CTransportComponent", MidSections.ReadTransport);
+            ReadSection(c, sections, "CAviationComponent", MidSections.ReadSingleByte);
+            ReadSection(c, sections, "CSkiingComponent", MidSections.ReadSingleByte);
+            ReadSection(c, sections, "CFarmingComponent", MidSections.ReadFarming);
+            ReadSection(c, sections, "CEventComponent", MidSections.ReadEvent);
+            ReadSection(c, sections, "CHeartStickerComponent", MidSections.ReadHeartSticker);
+            ReadSection(c, sections, "CJoustComponent", MidSections.ReadJoust);
+            body.Achievements = ReadSection(c, sections, "CAchievement", MidSections.ReadAchievements);
+            body.PrivateFarm = ReadSection(c, sections, "CPrivateFarmComponent", MidSections.ReadPrivateFarm);
+            body.Family = ReadSection(c, sections, "CFamilyComponent", MidSections.ReadFamily);
+            ReadSection(c, sections, "CDemiGodComponent", MidSections.ReadDemiGod);
+            ReadSection(c, sections, "CCommerceComponent", MidSections.ReadCommerce);
+            body.Talent = ReadSection(c, sections, "CTalentComponent", MidSections.ReadTalent);
+            body.ShapeShifts = ReadSection(c, sections, "CShapeShiftComponent", MidSections.ReadShapeShift);
+            ReadSection(c, sections, "feature:0x395", MidSections.ReadFeature0x395);
+            ReadSection(c, sections, "CRockPaperScissorsComponent", MidSections.ReadRockPaperScissors);
+            ReadSection(c, sections, "CRegisterComponent", MidSections.ReadRegister);
+            body.EgoWeapons = ReadSection(c, sections, "CNewEgoWeaponComponent", MidSections.ReadNewEgoWeapon);
+            ReadSection(c, sections, "CMagigraphComponent", static cur =>
             {
-                if (e[p].Type != MessageElemType.Long) break;
-                ulong inst = Long(e, p);
-                byte[] core = Bin(e, p + 2);
-                string sig = Str(e, p + 4);
-                int attN = e.Count > p + 6 && e[p + 6].Type == MessageElemType.Byte ? e[p + 6].AsByte() : 0;
-                items.Add(BuildItem(inst, core, sig));
-                p += 11 + attN; // fixed 11 elems + attN attachment bins
-            }
-            afterInventory = p;
+                // No field structure was established for this one; consume the
+                // documented span so the components after it stay aligned.
+                cur.Skip(MidSections.MagigraphLength);
+                return 0;
+            });
+            body.MultiClass = ReadSection(c, sections, "CMultiClassComponent", MidSections.ReadMultiClass);
+            ReadSection(c, sections, "CPrivateIslandNPCComponent", MidSections.ReadPrivateIslandNpc);
+            body.Astrologist = ReadSection(c, sections, "CAstrologistComponent", MidSections.ReadAstrologist);
+            ReadSection(c, sections, "CRoyalAlchemistComponent", MidSections.ReadRoyalAlchemist);
+            body.MusicBuffSharing = ReadSection(c, sections, "CMusicBuffSharingComponent", MidSections.ReadMusicBuffSharing);
+
+            // The one gap sequential reading cannot cross. Consumed as an opaque
+            // span located by the quest log's anchor rather than by a length.
+            ReadSection(c, sections, "unattributed", static cur =>
+            {
+                cur.Skip(QuestSection.FindQuestCtrl(cur, UnattributedSearchLimit));
+                return 0;
+            });
+
+            body.Quests = ReadSection(c, sections, "CQuestCtrl", QuestSection.Read);
+            body.Tail = ReadSection(c, sections, "tail", TailSection.Read);
+        }
+        catch (SnapshotFormatException ex)
+        {
+            error = ex.Message;
         }
 
-        // --- Skill book: Short keywordCount, keywords, Short skillCount, bins
-        var skills = new List<SnapshotSkill>();
-        int sp = afterInventory;
-        if (sp >= 0 && sp + 1 < e.Count && e[sp].Type == MessageElemType.Short)
-        {
-            int keywordCount = e[sp].AsUInt16();
-            sp += 1 + keywordCount;            // skip keyword shorts
-            if (sp < e.Count && e[sp].Type == MessageElemType.Short)
-            {
-                int skillCount = e[sp].AsUInt16();
-                sp += 1;
-                for (int s = 0; s < skillCount && sp < e.Count; s++, sp++)
-                {
-                    if (e[sp].Type != MessageElemType.Bin) break;
-                    var b = e[sp].AsBytes();
-                    if (b.Length >= 5)
-                        skills.Add(new SnapshotSkill(
-                            (ushort)(b[0] | (b[1] << 8)), b[4]));
-                }
-            }
-        }
-
-        // --- Master identity + KV metadata (scan the tail) ----------------
-        (ulong masterId, string masterName, string metadata) = ScanTail(e, sp, name, entityId);
-
-        return new ChannelCharacterInfo(
-            entityId, name, raceId, region, posX, posY, dir,
-            height, weight, c1, c2, c3, cp,
-            life, lifeMax, mana, manaMax, stamina, staminaMax,
-            level, totalLevelDiff, rebirth,
-            str, dex, intel, will, luck,
-            regens, bagW, bagH, items, skills,
-            masterId, masterName, metadata);
+        return new CharacterSnapshot(result, characterId, body, sections,
+            c.Index, input.Elems.Count,
+            error ?? (c.Index == input.Elems.Count ? null : "tail not parsed yet"));
     }
 
-    // Scan forward for a plausible inventory header: Int w (1-12), Int h
-    // (1-20), Int n (0-300), followed by a Long item id when n > 0.
-    private static int FindBagHeader(IReadOnlyList<MessageElem> e, int from)
+    /// <summary>Runs one section's reader and records the span it consumed.</summary>
+    private static T ReadSection<T>(ElemCursor c, List<SnapshotSection> sections,
+        string name, Func<ElemCursor, T> read)
     {
-        for (int i = Math.Max(0, from); i + 3 < e.Count; i++)
-        {
-            if (e[i].Type != MessageElemType.Int ||
-                e[i + 1].Type != MessageElemType.Int ||
-                e[i + 2].Type != MessageElemType.Int) continue;
-            uint w = e[i].AsUInt32(), h = e[i + 1].AsUInt32(), n = e[i + 2].AsUInt32();
-            if (w == 0 || w > 12 || h == 0 || h > 20 || n > 300) continue;
-            if (n == 0) return i; // empty bag, no Long follows
-            if (e[i + 3].Type == MessageElemType.Long && e[i + 3].AsUInt64() > 1_000_000_000UL)
-                return i;
-        }
-        return -1;
+        int start = c.Index;
+        var value = read(c);
+        sections.Add(new SnapshotSection(name, start, c.Index - start,
+            c.Slice(start, c.Index - start)));
+        return value;
     }
-
-    private static SnapshotItem BuildItem(ulong inst, byte[] core, string sig)
-    {
-        uint U(int o) => core.Length >= o + 4 ? BinaryPrimitives.ReadUInt32LittleEndian(core.AsSpan(o, 4)) : 0;
-        return new SnapshotItem(
-            RecType: U(0),
-            ItemId: U(4),
-            Quantity: U(36),
-            PosX: U(44),
-            PosY: U(48),
-            InstanceId: inst,
-            Signature: sig);
-    }
-
-    // Entity IDs live in a high band (~4.5e15); FILETIMEs (~6.4e13) and small
-    // counters must not be mistaken for the master EID.
-    private const ulong EntityIdMin = 4_000_000_000_000_000UL;
-    private const ulong EntityIdMax = 5_000_000_000_000_000UL;
-
-    // From the post-skillbook tail: the master EID is the most frequent
-    // entity-range Long that isn't the snapshot's own id; the master name is the
-    // first non-empty plain String; the metadata is the longest KV blob.
-    private static (ulong, string, string) ScanTail(
-        IReadOnlyList<MessageElem> e, int from, string selfName, ulong selfId)
-    {
-        var longCounts = new Dictionary<ulong, int>();
-        string masterName = "";
-        string metadata = "";
-        for (int i = Math.Max(0, from); i < e.Count; i++)
-        {
-            var el = e[i];
-            if (el.Type == MessageElemType.Long)
-            {
-                ulong v = el.AsUInt64();
-                if (v >= EntityIdMin && v <= EntityIdMax && v != selfId)
-                    longCounts[v] = longCounts.GetValueOrDefault(v) + 1;
-            }
-            else if (el.Type == MessageElemType.String)
-            {
-                var s = el.AsString();
-                if (s.Length == 0) continue;
-                if (masterName.Length == 0 && s != selfName && !s.Contains(':') && s.Length < 32)
-                    masterName = s;
-                if (s.Length > metadata.Length && s.Contains(';') && s.Contains(':'))
-                    metadata = s;
-            }
-        }
-        ulong masterId = 0;
-        int best = 0;
-        foreach (var kv in longCounts)
-            if (kv.Value > best) { best = kv.Value; masterId = kv.Key; }
-        return (masterId, masterName, metadata);
-    }
-
-    // --- Guarded element accessors ---------------------------------------
-    private static ulong Long(IReadOnlyList<MessageElem> e, int i) =>
-        i >= 0 && i < e.Count && e[i].Type == MessageElemType.Long ? e[i].AsUInt64() : 0;
-    private static uint Int(IReadOnlyList<MessageElem> e, int i) =>
-        i >= 0 && i < e.Count && e[i].Type == MessageElemType.Int ? e[i].AsUInt32() : 0;
-    private static ushort Short(IReadOnlyList<MessageElem> e, int i) =>
-        i >= 0 && i < e.Count && e[i].Type == MessageElemType.Short ? e[i].AsUInt16() : (ushort)0;
-    private static byte Byte(IReadOnlyList<MessageElem> e, int i) =>
-        i >= 0 && i < e.Count && e[i].Type == MessageElemType.Byte ? e[i].AsByte() : (byte)0;
-    private static float Flt(IReadOnlyList<MessageElem> e, int i) =>
-        i >= 0 && i < e.Count && e[i].Type == MessageElemType.Float ? e[i].AsFloat() : 0f;
-    private static string Str(IReadOnlyList<MessageElem> e, int i) =>
-        i >= 0 && i < e.Count && e[i].Type == MessageElemType.String ? e[i].AsString() : "";
-    private static byte[] Bin(IReadOnlyList<MessageElem> e, int i) =>
-        i >= 0 && i < e.Count && e[i].Type == MessageElemType.Bin ? e[i].AsBytes() : Array.Empty<byte>();
 }
