@@ -5,13 +5,26 @@ namespace Mabipacade.Core.Sources;
 public sealed class LiveFrameSource : IFrameSource
 {
     private readonly ICaptureDevice _device;
-    private readonly string _bpfFilter;
+    private string _bpfFilter;
     private Task? _stopTask;
 
     public LiveFrameSource(ICaptureDevice device, string bpfFilter)
     {
         _device = device;
         _bpfFilter = bpfFilter;
+    }
+
+    public string Filter => _bpfFilter;
+
+    /// <summary>
+    /// Replaces the filter on the running capture. Recreating the source instead
+    /// would drop the FrameReceived subscriptions the recorder and the pipeline
+    /// hold, so the watchdog updates the live handle in place.
+    /// </summary>
+    public void SetFilter(string bpfFilter)
+    {
+        _bpfFilter = bpfFilter;
+        _device.Filter = bpfFilter;
     }
 
     public event EventHandler<RawFrameEventArgs>? FrameReceived;

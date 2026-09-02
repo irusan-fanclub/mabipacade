@@ -11,12 +11,15 @@ namespace Mabipacade.Cli.Recording;
 
 internal sealed class SessionRecorder : IDisposable
 {
+    /// <summary>Recorded into the pcapng section header so the file names its own producer.</summary>
+    private const string RecorderApplication = "mabipacade";
+
     private readonly string _dir;
     private readonly string _region;
     private readonly int? _processId;
     private readonly IFrameSource _source;
     private readonly PacketPipeline _pipeline;
-    private readonly PcapWriter _pcap;
+    private readonly PcapNgWriter _pcap;
     private readonly StreamWriter _events;
     private readonly NdjsonWriter _eventsWriter;
     private readonly DateTime _startedAt = DateTime.UtcNow;
@@ -27,7 +30,8 @@ internal sealed class SessionRecorder : IDisposable
     private DateTime _currentSince;
 
     public SessionRecorder(string dir, string region, int? processId,
-        IFrameSource source, PacketPipeline pipeline, LinkLayers linkLayer)
+        IFrameSource source, PacketPipeline pipeline, LinkLayers linkLayer,
+        string? nicDescription = null, string? captureFilter = null)
     {
         _dir = dir;
         _region = region;
@@ -35,7 +39,12 @@ internal sealed class SessionRecorder : IDisposable
         _source = source;
         _pipeline = pipeline;
         Directory.CreateDirectory(dir);
-        _pcap = new PcapWriter(Path.Combine(dir, "session.pcap"), linkLayer);
+        // pcapng carries the NIC and the BPF filter in the interface block, so a
+        // capture handed to someone else says what it was taken from.
+        _pcap = new PcapNgWriter(Path.Combine(dir, "session.pcapng"), linkLayer,
+            interfaceDescription: nicDescription,
+            captureFilter: captureFilter,
+            application: RecorderApplication);
         _events = new StreamWriter(Path.Combine(dir, "session.events.ndjson"), append: false, Encoding.UTF8);
         _eventsWriter = new NdjsonWriter(_events);
     }

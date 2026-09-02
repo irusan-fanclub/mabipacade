@@ -53,12 +53,19 @@ internal static class ServeCaptureCommand
         if (device is null) { StderrLogger.Error($"No NIC routes to {endpoint.RemoteAddress}"); return 3; }
 
         var deviceDesc = device is LibPcapLiveDevice lp ? lp.Description : device.ToString() ?? "unknown";
-        var bpf = $"tcp and src host {endpoint.RemoteAddress} and src port {endpoint.RemotePort}";
+
+        // Cover the server's whole network so a channel switch is captured at
+        // once; the port vet decides what is actually ours.
+        var tracker = new ClientConnectionTracker(tcpTable, pid);
+        var bpf = BpfFilter.ForConnections(tracker.Snapshot())
+            ?? BpfFilter.ForAddress(endpoint.RemoteAddress)
+            ?? $"tcp and src host {endpoint.RemoteAddress}";
 
         using var host = new WebSocketHost(port, OpCodeNames.TryGetName);
         host.Start();
 
-        using var source = new LiveFrameSource(device, bpf);
+        var live = new LiveFrameSource(device, bpf);
+        using var source = new ClientTrafficFilterSource(live, tracker.IsClientLocalPort);
         var registry = new DecoderRegistry();
         DefaultDecoders.RegisterAll(registry);
         var pipeline = new PacketPipeline(source, registry);
@@ -72,6 +79,14 @@ internal static class ServeCaptureCommand
         StderrLogger.Info("Press Ctrl+C to stop.");
         var cts = new CancellationTokenSource();
         Console.CancelKeyPress += (_, e) => { e.Cancel = true; cts.Cancel(); };
+
+        var watchdog = new CaptureSession(tcpTable, pid, region, applyFilter: filter =>
+        {
+            live.SetFilter(filter);
+            StderrLogger.Info($"capture filter -> {filter}");
+        });
+        watchdog.SessionEventReceived += (_, ev) => host.BroadcastEvent(ev);
+        _ = watchdog.RunAsync(cts.Token);
         try { Task.Delay(Timeout.Infinite, cts.Token).GetAwaiter().GetResult(); }
         catch (OperationCanceledException) { }
 

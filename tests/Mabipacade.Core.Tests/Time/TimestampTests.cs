@@ -22,6 +22,36 @@ public class TimestampTests
     }
 
     [Fact]
+    public void ToLocalIso8601_ReadsAsLocalTime_AndKeepsTheInstant()
+    {
+        // Logs are read by a person against their own clock, so the rendered
+        // time is local — but the offset stays on it, because a log outgrows the
+        // machine that wrote it and a bare local time is then unreadable.
+        var utc = new DateTime(2026, 8, 14, 8, 58, 22, 854, DateTimeKind.Utc);
+
+        var text = Timestamp.ToLocalIso8601(utc);
+        var parsed = DateTimeOffset.Parse(text, System.Globalization.CultureInfo.InvariantCulture);
+
+        Assert.Equal(utc, parsed.UtcDateTime);
+        Assert.Equal(TimeZoneInfo.Local.GetUtcOffset(utc), parsed.Offset);
+        Assert.Equal(new DateTimeOffset(utc).ToLocalTime().Hour, parsed.Hour);
+    }
+
+    [Fact]
+    public void ToLocalIso8601_TreatsUnspecifiedKindAsUtc()
+    {
+        // DateTime.ToLocalTime() reads an Unspecified value as already-local and
+        // returns it untouched, which would silently emit the wrong instant for
+        // any timestamp that lost its Kind along the way.
+        var unspecified = new DateTime(2026, 8, 14, 8, 58, 22, 854, DateTimeKindUnspecified);
+        var utc = DateTime.SpecifyKind(unspecified, DateTimeKind.Utc);
+
+        Assert.Equal(Timestamp.ToLocalIso8601(utc), Timestamp.ToLocalIso8601(unspecified));
+    }
+
+    private const DateTimeKind DateTimeKindUnspecified = DateTimeKind.Unspecified;
+
+    [Fact]
     public void ToIso8601_RejectsLocalTime()
     {
         var local = DateTime.SpecifyKind(new DateTime(2026, 5, 13), DateTimeKind.Local);

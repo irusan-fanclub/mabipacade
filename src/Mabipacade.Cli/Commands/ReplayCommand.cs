@@ -12,7 +12,9 @@ internal static class ReplayCommand
 {
     public static Command Build()
     {
-        var input = new Option<FileInfo>("--in") { Description = "Pcap file to replay", Required = true };
+        // No extension whitelist: libpcap identifies the format from the file's
+        // magic bytes, so .cap and extensionless captures open too.
+        var input = new Option<FileInfo>("--in") { Description = "Capture file to replay (pcap or pcapng)", Required = true };
         var filterOp = new Option<string?>("--filter-op") { Description = "Comma-separated hex op list, e.g. 0x6984,0x7926" };
         var decodedOnly = new Option<bool>("--decoded-only") { Description = "Skip packets without an L3 decoder" };
         var diagnostics = new Option<string?>("--diagnostics") { Description = "off|on (default off)" };
@@ -62,7 +64,14 @@ internal static class ReplayCommand
         StderrLogger.Info($"Replaying {input.Name}…");
         pipeline.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
         pipeline.StopAsync().GetAwaiter().GetResult();
-        StderrLogger.Info($"Done. Packets: {pipeline.Metrics.TotalPackets}, BadBody: {pipeline.Metrics.BadBodyCount}");
+        var summary = $"Done. Packets: {pipeline.Metrics.TotalPackets}, BadBody: {pipeline.Metrics.BadBodyCount}";
+        if (pipeline.Metrics.MalformedFrameCount > 0)
+            summary += $", MalformedFrames: {pipeline.Metrics.MalformedFrameCount}";
+        // Not an error — the file simply ends mid-record, which is normal for a
+        // recorder that was killed. Said plainly so a short read isn't mistaken
+        // for a complete one.
+        if (source.Truncated) summary += " (truncated tail)";
+        StderrLogger.Info(summary);
         return 0;
     }
 }

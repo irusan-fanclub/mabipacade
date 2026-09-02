@@ -83,7 +83,8 @@ internal sealed class WebSocketHost : IDisposable
     private string RenderPacket(MabiPacket p)
     {
         using var ms = new MemoryStream();
-        using (var w = new Utf8JsonWriter(ms))
+        // Shared settings: text goes out verbatim, matching the CLI's NDJSON.
+        using (var w = new Utf8JsonWriter(ms, MabiJson.WriterOptions()))
         {
             EnvelopeShape.WritePacket(w, p, _opNameLookup);
         }
@@ -93,7 +94,8 @@ internal sealed class WebSocketHost : IDisposable
     private string RenderEvent(SessionEvent ev)
     {
         using var ms = new MemoryStream();
-        using (var w = new Utf8JsonWriter(ms))
+        // Shared settings: text goes out verbatim, matching the CLI's NDJSON.
+        using (var w = new Utf8JsonWriter(ms, MabiJson.WriterOptions()))
         {
             EnvelopeShape.WriteEvent(w, ev);
         }

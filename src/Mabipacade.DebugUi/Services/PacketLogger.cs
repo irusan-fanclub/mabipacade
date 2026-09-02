@@ -10,11 +10,10 @@ namespace Mabipacade.DebugUi.Services;
 // thread is never blocked on disk I/O. One packet per line; safe to tail or grep.
 public sealed class PacketLogger : IDisposable
 {
-    private static readonly JsonSerializerOptions JsonOpts = new()
-    {
-        WriteIndented = false,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
+    // Shared settings, so a name or a quest line reads the same here as in the
+    // CLI's output rather than arriving as \uXXXX escapes.
+    private static readonly JsonSerializerOptions JsonOpts =
+        Mabipacade.Core.Json.MabiJson.SerializerOptions();
 
     private readonly object _gate = new();
     private BlockingCollection<MabiPacket>? _queue;
@@ -158,7 +157,7 @@ public sealed class PacketLogger : IDisposable
         string? Body)
     {
         public static LogRecord From(MabiPacket p) => new(
-            T: p.TimestampUtc.ToString("O"),
+            T: Mabipacade.Core.Time.Timestamp.ToLocalIso8601(p.TimestampUtc),
             Dir: p.Direction == Direction.Inbound ? "in" : "out",
             Op: $"0x{p.Op:X8}",
             OpDec: p.Op,
