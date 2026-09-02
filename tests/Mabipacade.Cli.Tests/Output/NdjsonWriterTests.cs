@@ -27,6 +27,31 @@ public class NdjsonWriterTests
         Assert.EndsWith("}", lines[0]);
     }
 
+    private sealed record NamedThing(string Name, string Markup);
+
+    [Fact]
+    public void WritesNonAsciiText_Verbatim()
+    {
+        // Character, item and quest text is almost entirely CJK. Escaped as
+        // \uXXXX it is unreadable in a terminal, a diff, or a log — and the
+        // whole point of the decoded output is that a human reads it.
+        var sb = new StringBuilder();
+        using (var sw = new StringWriter(sb))
+        {
+            new NdjsonWriter(sw).WritePacket(new MabiPacket(
+                DateTime.UnixEpoch, Direction.Inbound, 0x00005209, 1UL,
+                new[] { MessageElem.String("蘑菇嫩煎雞") },
+                new NamedThing("蘑菇嫩煎雞", "* 經驗值 <color=2>75000</color>")));
+        }
+
+        var line = sb.ToString();
+        Assert.Contains("蘑菇嫩煎雞", line);
+        Assert.DoesNotContain("\\u8611", line);
+        // Quest reward text carries markup; escaping it to < helps nobody
+        // here, since this output goes to files and terminals, not to HTML.
+        Assert.Contains("<color=2>", line);
+    }
+
     [Fact]
     public void Packets_And_Events_PreserveOrder()
     {

@@ -7,17 +7,13 @@ namespace Mabipacade.Core.Json;
 
 public static class EnvelopeShape
 {
-    private static readonly JsonSerializerOptions PayloadOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = false,
-    };
+    private static readonly JsonSerializerOptions PayloadOptions = MabiJson.SerializerOptions();
 
     public static void WritePacket(Utf8JsonWriter w, MabiPacket p, Func<uint, string?>? opNameLookup = null)
     {
         w.WriteStartObject();
         w.WriteString("kind", "packet");
-        w.WriteString("ts", p.TimestampUtc.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
+        w.WriteString("ts", Time.Timestamp.ToLocalIso8601(p.TimestampUtc));
         w.WriteString("dir", p.Direction == Direction.Inbound ? "in" : "out");
         w.WriteString("op", $"0x{p.Op:X8}");
 
@@ -46,11 +42,33 @@ public static class EnvelopeShape
         w.WriteEndObject();
     }
 
+    /// <summary>
+    /// The compact single-packet shape used for handing a specimen to other
+    /// tools (iruneko keeps its reference packets in this form): just
+    /// t / dir / op / opDec / eid / elems — no decoded payload, no body.
+    /// </summary>
+    public static void WritePacketSlim(Utf8JsonWriter w, MabiPacket p)
+    {
+        w.WriteStartObject();
+        w.WriteString("t", Time.Timestamp.ToLocalIso8601(p.TimestampUtc));
+        w.WriteString("dir", p.Direction == Direction.Inbound ? "in" : "out");
+        w.WriteString("op", $"0x{p.Op:X8}");
+        w.WriteNumber("opDec", p.Op);
+        w.WriteString("eid", p.EntityId.ToString());
+
+        w.WritePropertyName("elems");
+        w.WriteStartArray();
+        foreach (var e in p.Elems) ElemJson.Write(w, e);
+        w.WriteEndArray();
+
+        w.WriteEndObject();
+    }
+
     public static void WriteEvent(Utf8JsonWriter w, SessionEvent ev)
     {
         w.WriteStartObject();
         w.WriteString("kind", "event");
-        w.WriteString("ts", ev.TimestampUtc.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
+        w.WriteString("ts", Time.Timestamp.ToLocalIso8601(ev.TimestampUtc));
         w.WriteString("type", ev.GetType().Name);
 
         switch (ev)

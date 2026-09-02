@@ -12,6 +12,9 @@
                 <Separator/>
                 <Button Content="Open pcap…" Click="OnOpenPcap" Margin="4,0"/>
                 <Button Content="Start Live" Command="{Binding StartLiveCommand}" Margin="4,0"/>
+                <CheckBox Content="Capture out" IsChecked="{Binding CaptureOutbound}"
+                          VerticalAlignment="Center" Margin="4,0"
+                          ToolTip="Also capture client→server packets. Applies at the next Start Live; default captures inbound only."/>
                 <Button Content="Stop"       Command="{Binding StopCommand}" Margin="4,0"/>
                 <Separator/>
                 <Button Content="Clear" Command="{Binding ClearCommand}" Margin="4,0"/>
@@ -75,7 +78,7 @@
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid Grid.Column="0"
+            <DataGrid Grid.Column="0" x:Name="PacketGrid"
                       ItemsSource="{Binding PacketList.Rows}"
                       SelectedItem="{Binding Detail.SelectedRow}"
                       AutoGenerateColumns="False"
@@ -83,7 +86,15 @@
                       VirtualizingPanel.IsVirtualizing="True"
                       VirtualizingPanel.VirtualizationMode="Recycling"
                       IsReadOnly="True"
-                      GridLinesVisibility="Horizontal">
+                      GridLinesVisibility="Horizontal"
+                      PreviewMouseRightButtonDown="OnGridRightClickSelect">
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Export packet as pcapng…" Click="OnExportPacketPcap"/>
+                        <MenuItem Header="Export packet as pcapng &amp; raw JSON…" Click="OnExportPacketPcapAndJson"/>
+                        <MenuItem Header="Export packet as JSON…" Click="OnExportPacketJson"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Time" Binding="{Binding Time}" Width="100"/>
                     <DataGridTextColumn Header="Dir"  Binding="{Binding Dir}"  Width="40"/>
@@ -96,28 +107,68 @@
 
             <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
 
-            <TabControl Grid.Column="2">
+            <TabControl Grid.Column="2" x:Name="DetailTabs">
                 <TabItem Header="Decoded">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4">
+                            <Button Content="Expand all" Click="OnExpandDecoded" Padding="8,2" Margin="0,0,4,0"/>
+                            <Button Content="Collapse all" Click="OnCollapseDecoded" Padding="8,2" Margin="0,0,12,0"/>
+                            <Button Content="Export JSON…" Click="OnExportPacketJson" Padding="8,2"/>
+                        </StackPanel>
+                        <TreeView ItemsSource="{Binding Detail.DecodedNodes}" FontFamily="Consolas"
+                                  VirtualizingStackPanel.IsVirtualizing="True"
+                                  VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                            <TreeView.ItemContainerStyle>
+                                <Style TargetType="TreeViewItem">
+                                    <!-- Two-way so expanding a row builds its children on demand. -->
+                                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                                </Style>
+                            </TreeView.ItemContainerStyle>
+                            <TreeView.ItemTemplate>
+                                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                    <TextBlock Text="{Binding Summary}" ToolTip="{Binding Value}"/>
+                                </HierarchicalDataTemplate>
+                            </TreeView.ItemTemplate>
+                        </TreeView>
+                    </DockPanel>
+                </TabItem>
+                <TabItem Header="Decoded (raw)">
                     <ScrollViewer>
                         <TextBox Text="{Binding Detail.DecodedJson, Mode=OneWay}" IsReadOnly="True"
                                  FontFamily="Consolas" TextWrapping="NoWrap" AcceptsReturn="True"/>
                     </ScrollViewer>
                 </TabItem>
                 <TabItem Header="Elems">
-                    <DataGrid ItemsSource="{Binding Detail.ElemNodes}" AutoGenerateColumns="False" IsReadOnly="True">
+                    <DataGrid x:Name="ElemsGrid" ItemsSource="{Binding Detail.ElemNodes}"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              PreviewMouseRightButtonDown="OnGridRightClickSelect">
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Show in Hex" Click="OnElemShowInHex"/>
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="#"     Binding="{Binding Index}"    Width="40"/>
-                            <DataGridTextColumn Header="Type"  Binding="{Binding TypeName}" Width="80"/>
-                            <DataGridTextColumn Header="Value" Binding="{Binding Display}"  Width="*"/>
+                            <DataGridTextColumn Header="#"      Binding="{Binding Index}"       Width="40"/>
+                            <DataGridTextColumn Header="Type"   Binding="{Binding TypeName}"    Width="80"/>
+                            <DataGridTextColumn Header="Offset" Binding="{Binding OffsetLabel}" Width="60" FontFamily="Consolas"/>
+                            <DataGridTextColumn Header="Value"  Binding="{Binding Display}"     Width="*"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>
-                <TabItem Header="Hex">
-                    <DataGrid ItemsSource="{Binding Detail.HexLines}" AutoGenerateColumns="False"
+                <TabItem Header="Hex" x:Name="HexTab">
+                    <DataGrid x:Name="HexGrid" ItemsSource="{Binding Detail.HexLines}" AutoGenerateColumns="False"
                               FontFamily="Consolas" IsReadOnly="True">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Offset" Binding="{Binding Offset, StringFormat=X4}" Width="60"/>
-                            <DataGridTextColumn Header="Bytes"  Binding="{Binding HexBytes}" Width="*"/>
+                            <DataGridTemplateColumn Header="Bytes" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <!-- Runs kept on one line: XAML whitespace between them would leak into the dump. -->
+                                        <TextBlock FontFamily="Consolas"><Run Text="{Binding HexPre, Mode=OneWay}"/><Run Text="{Binding HexHit, Mode=OneWay}" Background="#FFD54F"/><Run Text="{Binding HexPost, Mode=OneWay}"/></TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn Header="ASCII"  Binding="{Binding Ascii}"    Width="160"/>
                         </DataGrid.Columns>
                     </DataGrid>

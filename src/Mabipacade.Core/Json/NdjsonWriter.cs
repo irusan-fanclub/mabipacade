@@ -22,7 +22,7 @@ public sealed class NdjsonWriter
     private void WriteLine(Action<Utf8JsonWriter> writeBody)
     {
         using var ms = new MemoryStream();
-        using (var jw = new Utf8JsonWriter(ms, new JsonWriterOptions { Indented = false }))
+        using (var jw = new Utf8JsonWriter(ms, MabiJson.WriterOptions()))
         {
             writeBody(jw);
         }

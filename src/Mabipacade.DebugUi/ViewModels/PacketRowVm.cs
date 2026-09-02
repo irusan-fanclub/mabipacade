@@ -16,7 +16,10 @@ public sealed class PacketRowVm
     public PacketRowVm(MabiPacket packet, NameResolver? names = null)
     {
         Packet = packet;
-        Time = packet.TimestampUtc.ToString("HH:mm:ss.fff");
+        // Local: the grid is read against the wall clock. No offset here — the
+        // column has no room and every row shares the same one anyway.
+        Time = DateTime.SpecifyKind(packet.TimestampUtc, DateTimeKind.Utc)
+            .ToLocalTime().ToString("HH:mm:ss.fff");
         Dir = packet.Direction == Direction.Inbound ? "in" : "out";
         Op = $"0x{packet.Op:X8}";
         EntityId = packet.EntityId.ToString();

@@ -29,7 +29,9 @@ public class PacketRowVmTests
             new[] { MessageElem.Short(1) }, Decoded: null);
         var row = new PacketRowVm(packet);
 
-        Assert.Equal("08:23:11.842", row.Time);
+        // Local time, so the grid matches the clock on the wall. Derived rather
+        // than hard-coded: a literal would bake in the author's timezone.
+        Assert.Equal(ts.ToLocalTime().ToString("HH:mm:ss.fff"), row.Time);
         Assert.Equal("in", row.Dir);
         Assert.Equal("0x00006984", row.Op);
         Assert.Equal("12345", row.EntityId);
