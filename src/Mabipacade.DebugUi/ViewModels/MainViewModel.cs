@@ -14,8 +14,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private readonly Services.NameResolverService _nameResolver = new();
     private readonly PacketLogger _logger = new();
+    private readonly FrameRecorder _frames = new();
+
+    // Held so the subscription can be undone after StopActive has cleared the
+    // session it came from.
+    private Mabipacade.Core.Sources.IFrameSource? _recordingSource;
+    private EventHandler<Mabipacade.Core.Sources.RawFrameEventArgs>? _frameHandler;
+    private CancellationTokenSource? _watchdogCts;
     private string _logsDirectory;
     private bool _isRunning;
+    private bool _captureOutbound;
     private string _activityState = "○ Stopped";
     private string _loggerLabel = "log: off";
 
@@ -41,6 +49,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         private set => SetField(ref _activityState, value);
     }
 
+    /// <summary>
+    /// Whether the next live capture also takes client→server frames. Read at
+    /// Start Live; toggling it mid-capture changes nothing until a restart.
+    /// </summary>
+    public bool CaptureOutbound
+    {
+        get => _captureOutbound;
+        set => SetField(ref _captureOutbound, value);
+    }
+
     public SourceViewModel Source { get; } = new();
     public FilterViewModel Filter { get; } = new();
     public PacketListViewModel PacketList { get; }
@@ -59,6 +77,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public bool IsLogging => _logger.IsActive;
     public string? CurrentLogPath => _logger.CurrentPath;
+
+    /// <summary>The pcapng being written, or null when only the NDJSON log is running.</summary>
+    public string? CurrentCapturePath => _frames.IsActive ? _frames.CurrentPath : null;
+
+    /// <summary>Frames dropped because the writer fell behind; non-zero means the capture has gaps.</summary>
+    public long FramesDropped => _frames.FramesDropped;
     public string LoggerLabel
     {
         get => _loggerLabel;
@@ -127,15 +151,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         StopActive();
         try
         {
-            var session = LiveSessionFactory.Create("tw", "Client.exe", _dispatcher);
-            _liveSession = session;
-            _activeHost = session.Host;
-            Wire(session.Host);
-            Source.Mode = SourceMode.Live;
-            _ = session.Host.StartAsync(CancellationToken.None);
-            ActivityState = "● Live";
-            Status.SetConnection($"live {session.Endpoint.RemoteAddress}:{session.Endpoint.RemotePort}");
-            IsRunning = true;
+            BeginLiveSession(LiveSessionFactory.Create("tw", "Client.exe", _dispatcher,
+                captureOutbound: CaptureOutbound));
         }
         catch (LiveSessionFactory.BootstrapException e)
         {
@@ -145,9 +162,44 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>
+    /// Takes over a live capture and starts everything that hangs off it.
+    /// Separate from <see cref="StartLive"/> so the wiring can be exercised
+    /// without a running game.
+    /// </summary>
+    internal void BeginLiveSession(LiveSession session)
+    {
+        _liveSession = session;
+        _activeHost = session.Host;
+        Wire(session.Host);
+        Source.Mode = SourceMode.Live;
+        _ = session.Host.StartAsync(CancellationToken.None);
+
+        // Follows the client's connections: keeps the capture filter current
+        // across a channel switch, and reports the switch as a session event.
+        _watchdogCts = new CancellationTokenSource();
+        session.Watchdog.SessionEventReceived += (_, e) => _dispatcher.BeginInvoke(() => Status.HandleEvent(e));
+        _ = session.Watchdog.RunAsync(_watchdogCts.Token);
+
+        // A log may already be running — started before the capture was, or
+        // carried over from a session that just ended. Either way the frames
+        // belong in it.
+        SyncFrameRecording();
+
+        ActivityState = "● Live";
+        Status.SetConnection($"live {session.Endpoint.RemoteAddress}:{session.Endpoint.RemotePort}");
+        IsRunning = true;
+    }
+
     public void StopActive()
     {
         if (_activeHost is null) return;
+        // The frames being recorded come from this session, so the recording
+        // ends with it rather than being left holding a dead source.
+        StopFrameRecording();
+        _watchdogCts?.Cancel();
+        _watchdogCts?.Dispose();
+        _watchdogCts = null;
         _ = _activeHost.StopAsync();
         _activeHost.Dispose();
         _activeHost = null;
@@ -191,15 +243,79 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         host.SessionEventReceived += (_, e) => Status.HandleEvent(e);
     }
 
+    /// <summary>
+    /// Starts a recording session: decoded packets as NDJSON, and — when the
+    /// source is live — the raw frames as pcapng alongside it, sharing the
+    /// file stem.
+    /// </summary>
     public string StartLogging(string? path = null)
     {
         if (_logger.IsActive) return _logger.CurrentPath!;
         var target = path ?? PacketLogger.BuildDefaultPath(_logsDirectory, DateTime.Now);
         _logger.Start(target);
+        SyncFrameRecording();
         return target;
     }
 
-    public void StopLogging() => _logger.Stop();
+    public void StopLogging()
+    {
+        StopFrameRecording();
+        _logger.Stop();
+    }
+
+    /// <summary>
+    /// Brings frame recording in line with the current state instead of arming
+    /// it at one moment: it runs exactly while a log and a live capture are both
+    /// going. Arming once was the bug — starting the log before the capture, or
+    /// restarting the capture under a running log, left the pcapng missing while
+    /// the NDJSON filled up as usual.
+    /// </summary>
+    private void SyncFrameRecording()
+    {
+        bool shouldRecord = _logger.IsActive && _liveSession is not null;
+        if (shouldRecord == _frames.IsActive) return;
+
+        if (shouldRecord) StartFrameRecording(_logger.CurrentPath!);
+        else StopFrameRecording();
+    }
+
+    /// <summary>
+    /// Only a live capture is worth recording to pcapng. In replay the frames
+    /// came from a capture file that already exists, so recording them would
+    /// just copy it.
+    /// </summary>
+    private void StartFrameRecording(string logPath)
+    {
+        if (_liveSession is not { } live) return;
+
+        var capturePath = Path.ChangeExtension(logPath, ".pcapng");
+        try
+        {
+            _frames.Start(capturePath, PacketDotNet.LinkLayers.Ethernet,
+                nicDescription: live.NicDescription,
+                captureFilter: live.CaptureFilter);
+        }
+        catch (IOException)
+        {
+            // The NDJSON log is already running; losing the capture file is
+            // worth reporting but not worth aborting the session over.
+            Status.SetConnection($"capture file unavailable: {Path.GetFileName(capturePath)}");
+            return;
+        }
+
+        _recordingSource = live.Source;
+        _frameHandler = (_, e) => _frames.Append(e.Data, e.TimestampUtc);
+        _recordingSource.FrameReceived += _frameHandler;
+    }
+
+    private void StopFrameRecording()
+    {
+        if (_recordingSource is not null && _frameHandler is not null)
+            _recordingSource.FrameReceived -= _frameHandler;
+        _recordingSource = null;
+        _frameHandler = null;
+        _frames.Stop();
+    }
 
     public void SaveLogAs(string targetPath) => _logger.CopyTo(targetPath);
 
@@ -209,8 +325,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(CurrentLogPath));
         (StartLogCommand as RelayCommand)?.RaiseCanExecuteChanged();
         (StopLogCommand as RelayCommand)?.RaiseCanExecuteChanged();
+        // The "+pcapng" tail is how you can tell at a glance whether the raw
+        // capture is being written too — it is not, in replay.
         LoggerLabel = _logger.IsActive
-            ? $"log: {Path.GetFileName(_logger.CurrentPath)}"
+            ? $"log: {Path.GetFileName(_logger.CurrentPath)}{(_frames.IsActive ? " +pcapng" : "")}"
             : _logger.CurrentPath is { } last
                 ? $"log: {Path.GetFileName(last)} (stopped)"
                 : "log: off";
@@ -227,5 +345,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _statsTimer?.Dispose();
         StopActive();
         _logger.Dispose();
+        _frames.Dispose();
     }
 }
