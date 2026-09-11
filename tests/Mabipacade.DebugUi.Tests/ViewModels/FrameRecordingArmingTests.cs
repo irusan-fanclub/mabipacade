@@ -28,7 +28,9 @@ public class FrameRecordingArmingTests : IDisposable
     private sealed class IdleSource : IFrameSource
     {
         public event EventHandler<RawFrameEventArgs>? FrameReceived;
+#pragma warning disable CS0067
         public event EventHandler? EndOfStream;
+#pragma warning restore CS0067
         public Task StartAsync(CancellationToken ct) => Task.CompletedTask;
         public Task StopAsync() => Task.CompletedTask;
         public void Dispose() { }
