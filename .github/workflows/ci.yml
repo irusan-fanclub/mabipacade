@@ -26,8 +26,8 @@ jobs:
       - name: Build (warnings as errors)
         run: dotnet build --no-restore -p:TreatWarningsAsErrors=true
 
-      # Skip tests that load wpcap.dll (PcapWriter directly, SessionRecorder via
-      # PcapWriter). Npcap isn't installed on GitHub-hosted runners; local dev
-      # runs the full suite.
+      # Skip tests tagged [Trait("Category", "Npcap")]: they read captures back
+      # through SharpPcap, which loads wpcap.dll. Npcap isn't installed on
+      # GitHub-hosted runners; local dev runs the full suite.
       - name: Test
-        run: dotnet test --no-build --filter "FullyQualifiedName!~PcapWriter&FullyQualifiedName!~SessionRecorder"
+        run: dotnet test --no-build --filter "Category!=Npcap"

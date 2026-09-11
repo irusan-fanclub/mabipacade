@@ -3,6 +3,7 @@ using Mabipacade.Core.Tests.Pipeline;
 
 namespace Mabipacade.Core.Tests.Sources;
 
+[Trait("Category", "Npcap")]
 public class PcapFileFrameSourceTests
 {
     private static byte[] Frame(ushort srcPort)

@@ -44,6 +44,7 @@ public class PacketPcapExporterTests
         Assert.Equal(ValidBody, slice.Body);
     }
 
+    [Trait("Category", "Npcap")]
     [Fact]
     public async Task ExportedFile_ReplaysThroughThePipeline_AsTheSamePacket()
     {
@@ -76,6 +77,7 @@ public class PacketPcapExporterTests
         }
     }
 
+    [Trait("Category", "Npcap")]
     [Fact]
     public async Task MultiPacketExport_ReplaysAllPackets_InOrder()
     {

@@ -20,6 +20,7 @@ public class PcapNgWriterTests
         return frames;
     }
 
+    [Trait("Category", "Npcap")]
     [Fact]
     public async Task WrittenFrames_ReadBackThroughTheRealReader()
     {
@@ -68,6 +69,7 @@ public class PcapNgWriterTests
         finally { if (File.Exists(path)) File.Delete(path); }
     }
 
+    [Trait("Category", "Npcap")]
     [Fact]
     public async Task ReadingBack_LosesSubMicroseconds_BecauseOfSharpPcap()
     {

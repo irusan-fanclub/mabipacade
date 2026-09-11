@@ -51,11 +51,11 @@ Update `Directory.Build.props` `<Version>` first.
 Required for the full test suite:
 
 - **.NET 10 SDK** — <https://dotnet.microsoft.com/download/dotnet/10.0>
-- **[Npcap](https://npcap.com/)** with WinPcap API-compatible Mode (only needed for `PcapWriterTests`)
+- **[Npcap](https://npcap.com/)** with WinPcap API-compatible Mode (only needed for tests tagged `[Trait("Category", "Npcap")]`, which read captures back through SharpPcap)
 
 ```bash
 dotnet test                                        # full suite
-dotnet test --filter "FullyQualifiedName!~PcapWriter"   # without Npcap
+dotnet test --filter "Category!=Npcap"                 # without Npcap
 .\scripts\publish.ps1                              # local release build
 ```
 

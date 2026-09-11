@@ -28,6 +28,7 @@ public class FrameRecorderTests : IDisposable
         return frames;
     }
 
+    [Trait("Category", "Npcap")]
     [Fact]
     public async Task RecordedFrames_ReadBackFromTheFile()
     {
@@ -81,6 +82,7 @@ public class FrameRecorderTests : IDisposable
         Assert.Equal(0, rec.FramesWritten);
     }
 
+    [Trait("Category", "Npcap")]
     [Fact]
     public async Task Stop_FlushesEveryQueuedFrame()
     {
