@@ -18,26 +18,45 @@ public sealed record IpRange(IPAddress Start, IPAddress End)
     }
 }
 
+public sealed record PortRange(ushort Start, ushort End)
+{
+    public bool Contains(ushort port) => port >= Start && port <= End;
+}
+
 public sealed record RegionProfile(
     string Name,
     IReadOnlyList<IpRange> ServerRanges,
-    IReadOnlyList<ushort> KnownPorts)
+    IReadOnlyList<ushort> KnownPorts,
+    IReadOnlyList<PortRange>? KnownPortRanges = null)
 {
     public bool Contains(IPAddress addr, ushort port)
     {
-        if (KnownPorts.Count > 0 && !KnownPorts.Contains(port)) return false;
+        if (!MatchesPort(port)) return false;
         if (ServerRanges.Count == 0) return true;
         foreach (var r in ServerRanges)
             if (r.Contains(addr)) return true;
+        return false;
+    }
+
+    private bool MatchesPort(ushort port)
+    {
+        bool hasFilter = KnownPorts.Count > 0 || KnownPortRanges is { Count: > 0 };
+        if (!hasFilter) return true;
+        if (KnownPorts.Contains(port)) return true;
+        if (KnownPortRanges is not null)
+            foreach (var r in KnownPortRanges)
+                if (r.Contains(port)) return true;
         return false;
     }
 }
 
 public static class RegionProfiles
 {
+    // 11000 is the TW login server; channel servers sit above it (11022 observed live).
     public static RegionProfile Taiwan { get; } = new("tw",
         Array.Empty<IpRange>(),
-        new ushort[] { 11000 });
+        Array.Empty<ushort>(),
+        new[] { new PortRange(11000, 11999) });
     public static RegionProfile Japan  { get; } = new("jp", Array.Empty<IpRange>(), Array.Empty<ushort>());
     public static RegionProfile Korea  { get; } = new("kr", Array.Empty<IpRange>(), Array.Empty<ushort>());
 }

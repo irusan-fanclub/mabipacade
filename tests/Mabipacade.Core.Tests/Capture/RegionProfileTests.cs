@@ -43,6 +43,30 @@ public class RegionProfileTests
     }
 
     [Fact]
+    public void Contains_Taiwan_MatchesChannelPortRange_11000To11999()
+    {
+        // Live TW channel servers sit above the 11000 login port (observed 11022).
+        Assert.True(RegionProfiles.Taiwan.Contains(IPAddress.Parse("210.208.80.34"), 11022));
+        Assert.True(RegionProfiles.Taiwan.Contains(IPAddress.Parse("210.208.80.34"), 11999));
+        Assert.False(RegionProfiles.Taiwan.Contains(IPAddress.Parse("210.208.80.10"), 8004));
+        Assert.False(RegionProfiles.Taiwan.Contains(IPAddress.Parse("210.208.80.34"), 12000));
+    }
+
+    [Fact]
+    public void Contains_PortRangeProfile_MatchesPortsInsideRange()
+    {
+        var profile = new RegionProfile("range-only",
+            Array.Empty<IpRange>(),
+            Array.Empty<ushort>(),
+            new[] { new PortRange(11000, 11999) });
+        Assert.True(profile.Contains(IPAddress.Parse("1.2.3.4"), 11000));
+        Assert.True(profile.Contains(IPAddress.Parse("1.2.3.4"), 11500));
+        Assert.True(profile.Contains(IPAddress.Parse("1.2.3.4"), 11999));
+        Assert.False(profile.Contains(IPAddress.Parse("1.2.3.4"), 10999));
+        Assert.False(profile.Contains(IPAddress.Parse("1.2.3.4"), 12000));
+    }
+
+    [Fact]
     public void Contains_Returns_False_ForIpv6()
     {
         var profile = new RegionProfile("test",

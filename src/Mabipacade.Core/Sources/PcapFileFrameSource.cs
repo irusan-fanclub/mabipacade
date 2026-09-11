@@ -10,8 +10,15 @@ public sealed class PcapFileFrameSource : IFrameSource
     private CancellationTokenSource? _cts;
     private TaskCompletionSource? _completion;
     private Task? _captureTask;
+    private long _framesRead;
 
     public PcapFileFrameSource(string path) { _path = path; }
+
+    /// <summary>
+    /// True when the file ended mid-record — the recorder was killed before its
+    /// buffered write completed. Frames read before that point are still valid.
+    /// </summary>
+    public bool Truncated { get; private set; }
 
     public event EventHandler<RawFrameEventArgs>? FrameReceived;
     public event EventHandler? EndOfStream;
@@ -37,20 +44,31 @@ public sealed class PcapFileFrameSource : IFrameSource
 
     private void OnCaptureStopped(object? sender, CaptureStoppedEventStatus status)
     {
+        // libpcap reports a record it cannot finish reading as a capture error.
+        // Once frames have come through, that means the file was cut mid-record
+        // — the everyday result of killing a recorder — and the frames already
+        // read are intact, so the read ends like any other end-of-file. Having
+        // read nothing is a different claim: the file is unusable, and going
+        // quiet would pass it off as an empty capture. Open() failures never
+        // reach here; they throw from StartAsync.
         if (status == CaptureStoppedEventStatus.ErrorWhileCapturing)
         {
-            _completion?.TrySetException(
-                new InvalidOperationException("Pcap capture failed: " + status));
+            if (Interlocked.Read(ref _framesRead) == 0)
+            {
+                _completion?.TrySetException(
+                    new InvalidOperationException("Pcap capture failed: " + status));
+                return;
+            }
+            Truncated = true;
         }
-        else
-        {
-            EndOfStream?.Invoke(this, EventArgs.Empty);
-            _completion?.TrySetResult();
-        }
+
+        EndOfStream?.Invoke(this, EventArgs.Empty);
+        _completion?.TrySetResult();
     }
 
     private void OnPacket(object? sender, PacketCapture e)
     {
+        Interlocked.Increment(ref _framesRead);
         var raw = e.GetPacket();
         FrameReceived?.Invoke(this, new RawFrameEventArgs(
             raw.Data,

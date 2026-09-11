@@ -5,7 +5,7 @@ namespace Mabipacade.DebugUi.Tests.ViewModels;
 
 public class PacketListViewModelTests
 {
-    private static MabiPacket Make(ushort op = 0x6984) =>
+    private static MabiPacket Make(uint op = 0x6984) =>
         new(DateTime.UtcNow, Direction.Inbound, op, 0UL, Array.Empty<MessageElem>(), null);
 
     [Fact]
@@ -23,24 +23,24 @@ public class PacketListViewModelTests
     {
         var filter = new FilterViewModel();
         var vm = new PacketListViewModel(filter, maxRows: 3);
-        vm.AddPacket(Make(op: 0x0001));
-        vm.AddPacket(Make(op: 0x0002));
-        vm.AddPacket(Make(op: 0x0003));
-        vm.AddPacket(Make(op: 0x0004));
+        vm.AddPacket(Make(op: 0x00000001));
+        vm.AddPacket(Make(op: 0x00000002));
+        vm.AddPacket(Make(op: 0x00000003));
+        vm.AddPacket(Make(op: 0x00000004));
         Assert.Equal(3, vm.Rows.Count);
-        Assert.Equal("0x0002", vm.Rows[0].Op);
-        Assert.Equal("0x0004", vm.Rows[2].Op);
+        Assert.Equal("0x00000002", vm.Rows[0].Op);
+        Assert.Equal("0x00000004", vm.Rows[2].Op);
     }
 
     [Fact]
     public void Add_FilteredOut_DoesNotAppearInRows()
     {
-        var filter = new FilterViewModel { OpText = "0x6984" };
+        var filter = new FilterViewModel { OpText = "0x00006984" };
         var vm = new PacketListViewModel(filter, maxRows: 100);
-        vm.AddPacket(Make(op: 0x6984));
-        vm.AddPacket(Make(op: 0x9999));
+        vm.AddPacket(Make(op: 0x00006984));
+        vm.AddPacket(Make(op: 0x00009999));
         Assert.Single(vm.Rows);
-        Assert.Equal("0x6984", vm.Rows[0].Op);
+        Assert.Equal("0x00006984", vm.Rows[0].Op);
     }
 
     [Fact]

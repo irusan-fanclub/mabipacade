@@ -90,6 +90,34 @@ public class MessageElemReaderTests
     }
 
     [Fact]
+    public void TryReadWithSpans_ReportsEachElemsByteRange_IncludingTagAndLengthPrefix()
+    {
+        var body = Header(3).Concat(new byte[]
+        {
+            0x01, 0x2A,                                     // Byte(42): 2 bytes at offset 3
+            0x06, 0x00, 0x03, 0x68, 0x69, 0x00,             // String "hi": tag+len+3 = 6 bytes at offset 5
+            0x03, 0x01, 0x02, 0x03, 0x04,                   // Int: 5 bytes at offset 11
+        }).ToArray();
+
+        var result = MessageElemReader.TryReadWithSpans(body, out var elems, out var spans);
+
+        Assert.Equal(ReadElemsResult.Ok, result);
+        Assert.Equal(elems.Count, spans.Count);
+        Assert.Equal(new ElemSpan(3, 2), spans[0]);
+        Assert.Equal(new ElemSpan(5, 6), spans[1]);
+        Assert.Equal(new ElemSpan(11, 5), spans[2]);
+    }
+
+    [Fact]
+    public void TryReadWithSpans_BadBody_YieldsNoSpans()
+    {
+        var body = Header(1).Concat(new byte[] { 0xAA, 0x00 }).ToArray();
+        var result = MessageElemReader.TryReadWithSpans(body, out _, out var spans);
+        Assert.Equal(ReadElemsResult.BadBody, result);
+        Assert.Empty(spans);
+    }
+
+    [Fact]
     public void Returns_BadBody_OnObsceneCount()
     {
         // Encode a uvarint > int.MaxValue (10-byte max uvarint for ulong.MaxValue)

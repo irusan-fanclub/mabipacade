@@ -1,6 +1,6 @@
 namespace Mabipacade.Core.Model;
 
 internal sealed record MabiPacketSlice(
-    ushort Op,
+    uint Op,
     ulong EntityId,
     byte[] Body);

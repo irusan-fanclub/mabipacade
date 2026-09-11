@@ -72,7 +72,12 @@ public sealed class ReplayTransport : IFrameSource
         State = ReplayState.Stopped;
         _playGate.Set();
         _cts?.Cancel();
-        _source.StopAsync();
+        // Observe the source's completion. A file too broken to yield a single
+        // frame faults it, and dropping the task on the floor would resurface
+        // that as an unobserved exception at GC. The transport reports position
+        // and state; reporting read failures is the caller's job.
+        _source.StopAsync().ContinueWith(static t => _ = t.Exception,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         StateChanged?.Invoke(this, State);
         _completion?.TrySetResult();
     }

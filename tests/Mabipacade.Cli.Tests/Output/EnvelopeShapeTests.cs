@@ -12,7 +12,9 @@ public class EnvelopeShapeTests
     private static string RenderPacket(MabiPacket p)
     {
         using var ms = new MemoryStream();
-        using (var w = new Utf8JsonWriter(ms))
+        // The writer settings production uses, so the test sees what ships —
+        // the default encoder escapes both CJK and the '+' in a UTC offset.
+        using (var w = new Utf8JsonWriter(ms, MabiJson.WriterOptions()))
         {
             EnvelopeShape.WritePacket(w, p, OpCodeNames.TryGetName);
         }
@@ -22,25 +24,74 @@ public class EnvelopeShapeTests
     private static string RenderEvent(SessionEvent ev)
     {
         using var ms = new MemoryStream();
-        using (var w = new Utf8JsonWriter(ms))
+        // The writer settings production uses, so the test sees what ships —
+        // the default encoder escapes both CJK and the '+' in a UTC offset.
+        using (var w = new Utf8JsonWriter(ms, MabiJson.WriterOptions()))
         {
             EnvelopeShape.WriteEvent(w, ev);
         }
         return System.Text.Encoding.UTF8.GetString(ms.ToArray());
     }
 
+    /// <summary>
+    /// The rendered "ts" is local time with its offset. Asserting the instant
+    /// rather than a literal keeps this passing wherever it runs — a fixed
+    /// string would encode whatever zone the author happened to be in.
+    /// </summary>
+    private static void AssertTimestampIs(DateTime expectedUtc, string json)
+    {
+        var m = System.Text.RegularExpressions.Regex.Match(json, "\"ts\":\"([^\"]+)\"");
+        Assert.True(m.Success, $"no ts field in {json}");
+
+        var rendered = DateTimeOffset.Parse(m.Groups[1].Value,
+            System.Globalization.CultureInfo.InvariantCulture);
+        Assert.Equal(expectedUtc, rendered.UtcDateTime);
+        Assert.Equal(TimeZoneInfo.Local.GetUtcOffset(expectedUtc), rendered.Offset);
+    }
+
+    [Fact]
+    public void PacketSlim_CarriesExactlyTheSpecimenFields()
+    {
+        var ts = new DateTime(2026, 5, 13, 8, 23, 11, 842, DateTimeKind.Utc);
+        var p = new MabiPacket(ts, Direction.Inbound, 0x00005209, 12345UL,
+            new[] { MessageElem.Short(59000), MessageElem.String("蘑菇") },
+            Decoded: new { anything = 1 }) { Body = new byte[] { 1, 2, 3 } };
+
+        using var ms = new MemoryStream();
+        using (var w = new Utf8JsonWriter(ms, MabiJson.WriterOptions()))
+        {
+            EnvelopeShape.WritePacketSlim(w, p);
+        }
+        var json = System.Text.Encoding.UTF8.GetString(ms.ToArray());
+
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+        Assert.Equal(new[] { "t", "dir", "op", "opDec", "eid", "elems" },
+            root.EnumerateObject().Select(o => o.Name).ToArray());
+        Assert.Equal("in", root.GetProperty("dir").GetString());
+        Assert.Equal("0x00005209", root.GetProperty("op").GetString());
+        Assert.Equal(0x5209u, root.GetProperty("opDec").GetUInt32());
+        Assert.Equal("12345", root.GetProperty("eid").GetString());
+        Assert.Equal(2, root.GetProperty("elems").GetArrayLength());
+        Assert.Equal("蘑菇", root.GetProperty("elems")[1].GetProperty("v").GetString());
+
+        var rendered = DateTimeOffset.Parse(root.GetProperty("t").GetString()!,
+            System.Globalization.CultureInfo.InvariantCulture);
+        Assert.Equal(ts, rendered.UtcDateTime);
+    }
+
     [Fact]
     public void Packet_ShapeAndFields()
     {
         var ts = new DateTime(2026, 5, 13, 8, 23, 11, 842, DateTimeKind.Utc);
-        var p = new MabiPacket(ts, Direction.Inbound, 0x6984, 12345UL,
+        var p = new MabiPacket(ts, Direction.Inbound, 0x00006984, 12345UL,
             new[] { MessageElem.Short(59000) }, Decoded: null);
         var json = RenderPacket(p);
 
         Assert.Contains("\"kind\":\"packet\"", json);
-        Assert.Contains("\"ts\":\"2026-05-13T08:23:11.842Z\"", json);
+        AssertTimestampIs(ts, json);
         Assert.Contains("\"dir\":\"in\"", json);
-        Assert.Contains("\"op\":\"0x6984\"", json);
+        Assert.Contains("\"op\":\"0x00006984\"", json);
         Assert.Contains("\"opName\":\"PlayerSkillPrepareStart\"", json);
         Assert.Contains("\"entityId\":\"12345\"", json);
         Assert.Contains("\"type\":null", json);
@@ -53,7 +104,7 @@ public class EnvelopeShapeTests
     {
         var ts = DateTime.UtcNow;
         var pocoLike = new { skillId = 59000 };
-        var p = new MabiPacket(ts, Direction.Inbound, 0x6984, 1UL,
+        var p = new MabiPacket(ts, Direction.Inbound, 0x00006984, 1UL,
             Array.Empty<MessageElem>(), Decoded: pocoLike);
         var json = RenderPacket(p);
 
@@ -64,7 +115,7 @@ public class EnvelopeShapeTests
     [Fact]
     public void Packet_UnknownOp_OpNameNull()
     {
-        var p = new MabiPacket(DateTime.UtcNow, Direction.Inbound, 0xFFFF, 0UL,
+        var p = new MabiPacket(DateTime.UtcNow, Direction.Inbound, 0x0000FFFF, 0UL,
             Array.Empty<MessageElem>(), null);
         var json = RenderPacket(p);
         Assert.Contains("\"opName\":null", json);
@@ -98,10 +149,10 @@ public class EnvelopeShapeTests
     [Fact]
     public void Event_BadBody_IncludesOpAndLength()
     {
-        var ev = new SessionEvent.BadBody(DateTime.UtcNow, 0x9093, 42);
+        var ev = new SessionEvent.BadBody(DateTime.UtcNow, 0x00009093, 42);
         var json = RenderEvent(ev);
         Assert.Contains("\"type\":\"BadBody\"", json);
-        Assert.Contains("\"op\":\"0x9093\"", json);
+        Assert.Contains("\"op\":\"0x00009093\"", json);
         Assert.Contains("\"length\":42", json);
     }
 }

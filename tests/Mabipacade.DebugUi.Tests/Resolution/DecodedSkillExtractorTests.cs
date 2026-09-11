@@ -23,14 +23,31 @@ public class DecodedSkillExtractorTests
     [Fact]
     public void CombatActionPack_ExtractsSubActionSkillIds()
     {
-        var pack = new CombatActionPack(1UL, new[]
+        var pack = new CombatActionPack(1u, 0UL, new[]
         {
-            new CombatSubAction(0, (ushort)12345, (ushort)0, 0UL, 0),
-            new CombatSubAction(0, (ushort)50001, (ushort)11111, 0UL, 0),
+            Attacker(12345),
+            Attacker(50001),
         });
         var ids = DecodedSkillExtractor.ExtractSkillIds(pack);
         Assert.Contains(12345, ids);
         Assert.Contains(50001, ids);
-        Assert.Contains(11111, ids);
     }
+
+    [Fact]
+    public void CombatActionPack_DoesNotReportVictimReactionAsUsedSkill()
+    {
+        // A victim's Defense (20001) is its answer to the attack, not a skill it used. The
+        // field is deliberately not named "*SkillId" so reflection does not collect it.
+        var pack = new CombatActionPack(1u, 0UL, new[]
+        {
+            Attacker(27203),
+            new CombatSubAction(1u, 2UL, 1, false, 2000, 0, 20001, 0, 0, null, null),
+        });
+        var ids = DecodedSkillExtractor.ExtractSkillIds(pack);
+        Assert.Contains(27203, ids);
+        Assert.DoesNotContain(20001, ids);
+    }
+
+    private static CombatSubAction Attacker(ushort skillId) =>
+        new(1u, 1UL, 2, true, 0, skillId, 0, 0, 0, null, null);
 }

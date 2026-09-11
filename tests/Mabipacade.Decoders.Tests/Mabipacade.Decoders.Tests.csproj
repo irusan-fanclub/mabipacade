@@ -19,6 +19,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Real TW G28S1 0x5209 capture, gzipped. The 0x5209 layout is sequential
+         with no length prefixes, so only a full-length real packet can prove a
+         section consumes the right number of elements. -->
+    <None Include="fixtures\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Mabipacade.Core\Mabipacade.Core.csproj" />
     <ProjectReference Include="..\..\src\Mabipacade.Decoders\Mabipacade.Decoders.csproj" />
   </ItemGroup>

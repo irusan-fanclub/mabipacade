@@ -15,27 +15,44 @@ public sealed class GameEndpointResolver
         _region = region;
     }
 
-    public GameEndpoint? TryResolveOnce()
-    {
-        var rows = _table.GetConnections();
+    public GameEndpoint? TryResolveOnce() => Resolve(_table.GetConnections());
 
+    /// <summary>
+    /// Picks the endpoint from connections already read. The watchdog polls the
+    /// table once per tick and uses the rows for both the filter and the
+    /// endpoint, so this overload keeps it to a single read.
+    /// </summary>
+    public GameEndpoint? Resolve(IReadOnlyList<TcpConnectionRow> rows)
+    {
         IEnumerable<TcpConnectionRow> candidates = rows
             .Where(r => r.State == TcpConnectionState.Established);
 
         if (_processPid is int pid)
         {
             var owned = candidates.Where(r => r.OwningPid == pid).ToList();
-            if (owned.Count > 0) return Pick(owned);
+            if (owned.Count > 0) return Pick(Rank(owned));
         }
 
         if (_region is not null)
         {
             var inRange = candidates.Where(r => _region.Contains(r.RemoteAddress, r.RemotePort)).ToList();
-            if (inRange.Count > 0) return Pick(inRange);
+            if (inRange.Count > 0) return Pick(Rank(inRange));
         }
 
         return null;
     }
+
+    // The game process also holds non-game connections (auth, telemetry) whose
+    // table order is arbitrary. A region match identifies the game stream when
+    // the client reaches the servers directly; a network accelerator rewrites
+    // the destination, so no profile can match and the tie-break falls to the
+    // port split that holds either way — login/lobby on the low well-known
+    // port, the game shard above it. Both are hints: neither drops a candidate,
+    // so a rewritten endpoint stays resolvable.
+    private IReadOnlyList<TcpConnectionRow> Rank(IReadOnlyList<TcpConnectionRow> rows) =>
+        rows.OrderByDescending(r => _region?.Contains(r.RemoteAddress, r.RemotePort) == true)
+            .ThenByDescending(r => r.RemotePort)
+            .ToList();
 
     private static GameEndpoint Pick(IReadOnlyList<TcpConnectionRow> rows)
     {

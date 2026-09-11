@@ -5,7 +5,7 @@ namespace Mabipacade.Core.Tests.Pipeline;
 internal static class TestPacketBuilder
 {
     // Layout: [sign:1][length:4 LE][flag:1][op:4 BE][entityId:8 BE][bodyTail...]
-    public static byte[] BuildNormal(ushort op, ulong entityId, byte[] bodyTail)
+    public static byte[] BuildNormal(uint op, ulong entityId, byte[] bodyTail)
     {
         int total = 6 + 4 + 8 + bodyTail.Length;
         var buf = new byte[total];

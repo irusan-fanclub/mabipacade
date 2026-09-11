@@ -7,12 +7,12 @@ namespace Mabipacade.Core.Tests.Pipeline;
 internal static class TestEthernetBuilder
 {
     public static byte[] WrapTcp(byte[] payload, ushort srcPort, ushort dstPort,
-        string srcIp = "10.0.0.1", string dstIp = "10.0.0.2")
+        string srcIp = "10.0.0.1", string dstIp = "10.0.0.2", uint sequenceNumber = 1000)
     {
         var tcp = new TcpPacket(srcPort, dstPort)
         {
             PayloadData = payload,
-            SequenceNumber = 1000,
+            SequenceNumber = sequenceNumber,
         };
         var ip = new IPv4Packet(IPAddress.Parse(srcIp), IPAddress.Parse(dstIp))
         {

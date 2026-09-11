@@ -18,7 +18,9 @@ internal static class CaptureCommand
     {
         var region = new Option<string>("--region") { Description = "Region profile: tw|jp|kr (default tw)", DefaultValueFactory = _ => "tw" };
         var process = new Option<string>("--process") { Description = "Process name to attach to (default Client.exe)", DefaultValueFactory = _ => "Client.exe" };
-        var recordPcap = new Option<DirectoryInfo?>("--record-pcap") { Description = "Directory to record session files into" };
+        // Name kept for compatibility with existing scripts; the capture itself
+        // is written as pcapng.
+        var recordPcap = new Option<DirectoryInfo?>("--record-pcap") { Description = "Directory to record session files into (capture is written as pcapng)" };
         var noStdout = new Option<bool>("--no-stdout") { Description = "Suppress stdout NDJSON (only record)" };
         var filterOp = new Option<string?>("--filter-op") { Description = "Comma-separated hex op list" };
         var decodedOnly = new Option<bool>("--decoded-only") { Description = "Skip packets without an L3 decoder" };
@@ -80,10 +82,20 @@ internal static class CaptureCommand
         }
 
         var deviceDesc = device is LibPcapLiveDevice lp ? lp.Description : device.ToString() ?? "unknown";
-        var bpf = $"tcp and src host {endpoint.RemoteAddress} and src port {endpoint.RemotePort}";
+
+        // Cover the server's whole network rather than one socket, so a channel
+        // switch is captured the instant it opens; the port vet below decides
+        // what is actually ours.
+        var tracker = new ClientConnectionTracker(tcpTable, pid);
+        var bpf = BpfFilter.ForConnections(tracker.Snapshot())
+            ?? BpfFilter.ForAddress(endpoint.RemoteAddress)
+            ?? $"tcp and src host {endpoint.RemoteAddress}";
         StderrLogger.Info($"Capturing on {deviceDesc} with filter: {bpf}");
 
-        using var source = new LiveFrameSource(device, bpf);
+        var live = new LiveFrameSource(device, bpf);
+        // Sits between the capture and everything downstream, the recorder
+        // included, so another machine's traffic never reaches the pcapng.
+        using var source = new ClientTrafficFilterSource(live, tracker.IsClientLocalPort);
         var registry = new DecoderRegistry();
         DefaultDecoders.RegisterAll(registry);
         var pipeline = new PacketPipeline(source, registry);
@@ -105,7 +117,8 @@ internal static class CaptureCommand
         if (recordDir is not null)
         {
             var sessionDir = Path.Combine(recordDir.FullName, DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss"));
-            recorder = new SessionRecorder(sessionDir, regionName, pid, source, pipeline, LinkLayers.Ethernet);
+            recorder = new SessionRecorder(sessionDir, regionName, pid, source, pipeline,
+                LinkLayers.Ethernet, nicDescription: deviceDesc, captureFilter: bpf);
             recorder.Start();
             StderrLogger.Info($"Recording to {sessionDir}");
         }
@@ -113,7 +126,21 @@ internal static class CaptureCommand
         var cts = new CancellationTokenSource();
         Console.CancelKeyPress += (_, e) => { e.Cancel = true; cts.Cancel(); };
 
+        // Keeps the filter equal to the networks the client is talking to, and
+        // reports endpoint changes so a channel switch is visible in the log.
+        var watchdog = new CaptureSession(tcpTable, pid, region, applyFilter: filter =>
+        {
+            live.SetFilter(filter);
+            StderrLogger.Info($"Capture filter -> {filter}");
+        });
+        watchdog.SessionEventReceived += (_, ev) =>
+        {
+            if (diag.PassesLive(ev)) writer?.WriteEvent(ev);
+            recorder?.WriteEvent(ev);
+        };
+
         pipeline.StartAsync(cts.Token).GetAwaiter().GetResult();
+        _ = watchdog.RunAsync(cts.Token);
         StderrLogger.Info("Press Ctrl+C to stop.");
         try { Task.Delay(Timeout.Infinite, cts.Token).GetAwaiter().GetResult(); }
         catch (OperationCanceledException) { }

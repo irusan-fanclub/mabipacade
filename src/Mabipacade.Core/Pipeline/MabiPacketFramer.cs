@@ -37,11 +37,15 @@ internal static class MabiPacketFramer
         if (buffer.Length < length) return FrameResult.NeedMore;
 
         var body = buffer.Slice(HeaderSize, (int)length - HeaderSize);
+        // Opcode is a full 32-bit BE field. The upper bytes carry a packet
+        // "category" (cat 1 / cat 2 on some TW pet/buff packets); truncating to
+        // 16 bits collides 0x00021208 with 0x1208. Aura's Op is `int` for the
+        // same reason.
         uint op = BinaryPrimitives.ReadUInt32BigEndian(body.Slice(0, 4));
         ulong entityId = BinaryPrimitives.ReadUInt64BigEndian(body.Slice(4, 8));
         var msg = body.Slice(12).ToArray();
 
-        slice = new MabiPacketSlice((ushort)op, entityId, msg);
+        slice = new MabiPacketSlice(op, entityId, msg);
         consumed = (int)length;
         return FrameResult.Ok;
     }

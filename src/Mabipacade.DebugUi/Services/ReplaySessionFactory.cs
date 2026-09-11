@@ -17,7 +17,16 @@ public static class ReplaySessionFactory
         DefaultDecoders.RegisterAll(registry);
         // Pipeline subscribes to the TRANSPORT, not the raw source.
         // This way pause-gate + rate-throttle in the transport actually gate decoding.
-        var pipeline = new PacketPipeline(transport, registry);
+        // The file does not say which region it came from; the TW port range is
+        // what tells client→server frames apart in a both-direction capture,
+        // and it labels inbound-only captures exactly as before.
+        // Decrypt outbound too: a both-direction capture carries the seed at each
+        // connection's start. An inbound-only file has no outbound to decrypt, so
+        // this only ever helps.
+        var pipeline = new PacketPipeline(transport, registry,
+            Mabipacade.Core.Pipeline.DirectionClassifiers.ByServerEndpoint(
+                Mabipacade.Core.Capture.RegionProfiles.Taiwan),
+            decryptOutbound: true);
         var host = new PipelineHost(pipeline, dispatcher);
         return new ReplaySession(host, transport);
     }

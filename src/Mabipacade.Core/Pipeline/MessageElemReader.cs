@@ -6,9 +6,29 @@ namespace Mabipacade.Core.Pipeline;
 
 public enum ReadElemsResult { Ok, BadBody }
 
+/// <summary>Byte range of one elem within the message body: tag byte through the end of its payload.</summary>
+public readonly record struct ElemSpan(int Offset, int Length);
+
 public static class MessageElemReader
 {
     public static ReadElemsResult TryRead(ReadOnlySpan<byte> body, out IReadOnlyList<MessageElem> elems)
+        => TryReadCore(body, out elems, null);
+
+    /// <summary>
+    /// Same read, but also reports where each elem sits in the body. The spans
+    /// come from the walk itself, so they cannot drift from what was parsed.
+    /// </summary>
+    public static ReadElemsResult TryReadWithSpans(ReadOnlySpan<byte> body,
+        out IReadOnlyList<MessageElem> elems, out IReadOnlyList<ElemSpan> spans)
+    {
+        var list = new List<ElemSpan>();
+        var result = TryReadCore(body, out elems, list);
+        spans = result == ReadElemsResult.Ok ? list : Array.Empty<ElemSpan>();
+        return result;
+    }
+
+    private static ReadElemsResult TryReadCore(ReadOnlySpan<byte> body,
+        out IReadOnlyList<MessageElem> elems, List<ElemSpan>? spans)
     {
         elems = Array.Empty<MessageElem>();
 
@@ -29,6 +49,7 @@ public static class MessageElemReader
         for (ulong i = 0; i < count; i++)
         {
             if (offset >= body.Length) return ReadElemsResult.BadBody;
+            int start = offset;
             byte tag = body[offset++];
             switch ((MessageElemType)tag)
             {
@@ -81,6 +102,7 @@ public static class MessageElemReader
                 default:
                     return ReadElemsResult.BadBody;
             }
+            spans?.Add(new ElemSpan(start, offset - start));
         }
         elems = list;
         return ReadElemsResult.Ok;
